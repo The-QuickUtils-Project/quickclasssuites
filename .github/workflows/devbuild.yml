@@ -1,0 +1,49 @@
+name: Build Electron + Vite
+
+on:
+    push:
+        branches:
+            - dev
+
+jobs:
+    build:
+        runs-on: windows-latest
+
+        steps:
+            # Checkout the repository
+              - name: Checkout code
+                uses: actions/checkout@v3
+
+            # Set up Node.js
+              - name: Set up Node.js
+                uses: actions/setup-node@v3
+                with:
+                    node-version: 18
+
+            # Install dependencies
+              - name: Install dependencies
+                run: npm install
+
+            # Build the project
+              - name: Build project
+                run: npm run build
+
+            # Cache Electron binaries
+              - name: Cache Electron binaries
+                uses: actions/cache@v3
+                with:
+                    path: ~/.cache/electron
+                    key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json') }}
+                    restore-keys: |
+                        ${{ runner.os }}-electron-
+
+            # Package the Electron app
+              - name: Package Electron app
+                run: npm run electron:build
+
+            # Upload build artifacts
+              - name: Upload build artifacts
+                uses: actions/upload-artifact@v3
+                with:
+                    name: electron-build
+                    path: dist/
