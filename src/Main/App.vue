@@ -1,19 +1,26 @@
 <script setup lang="ts">
-
+// @ts-ignore
+import MainPage from './components/MainPage.vue';
+function hideWindow() {
+  // @ts-ignore
+  window.electronApp.hideMainWindow();
+}
 </script>
 
 <template>
   <div id="app">
     <div id="titlebar">
       <img alt="quickclass-icon" id="icon" src="./assets/svgicon.svg" />
-      <img id="close_btn" src="./assets/Images/shared/close.png" alt="close"/>
+      <img id="close_btn" src="./assets/Images/shared/close.png" alt="close" @click="hideWindow"/>
     </div>
+    <MainPage />
   </div>
 </template>
 
 <style scoped>
 body, html{
-  background-color: #F7F7F7;
+  border-radius: 16px;
+  background: var(--Background, #F7F7F7);
 }
 #app {
   position: absolute;
@@ -24,8 +31,9 @@ body, html{
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
-  gap: 51px;
-  background-color: #F7F7F7;
+  gap: 40.8px;
+  border-radius: 16px;
+  background: var(--Background, #F7F7F7);
   overflow: hidden;
 }
 
@@ -52,5 +60,6 @@ body, html{
   right: 39px;
   top: 37.7px;
   -webkit-app-region: no-drag;
+  cursor: pointer;
 }
 </style>

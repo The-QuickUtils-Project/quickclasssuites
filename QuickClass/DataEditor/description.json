@@ -1,0 +1,6 @@
+{
+    "name": "QuickClass 班级学生档案编辑方案",
+    "API-Level": 1,
+    "version": "1.0.1",
+    "description": "适用于QuickDataEditor的班级学生档案编辑方案, 支持删除、修改等功能。"
+}

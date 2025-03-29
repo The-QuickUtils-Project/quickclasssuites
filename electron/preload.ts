@@ -21,4 +21,11 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 
   // You can expose other APTs you need here.
   // ...
+
+})
+
+contextBridge.exposeInMainWorld('electronApp', {
+  hideMainWindow() {
+    ipcRenderer.send('hide-main-window')
+  }
 })

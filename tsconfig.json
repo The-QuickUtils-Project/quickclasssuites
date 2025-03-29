@@ -18,8 +18,12 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "electron"],
+  "include": ["src/**/*.ts", "types/**/*.d.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "electron", "QuickClass"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

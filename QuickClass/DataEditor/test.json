@@ -1,0 +1,15 @@
+{
+    "students": {},
+    "groups": {
+        "g1": {
+            "name": "第一组",
+            "students": [],
+            "credit": 0
+        },
+        "g2": {
+            "name": "第二组",
+            "students": [],
+            "credit": 0
+        }
+    }
+}

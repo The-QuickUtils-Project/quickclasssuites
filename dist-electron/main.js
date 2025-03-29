@@ -1,6 +1,15 @@
-import { app, BrowserWindow, Tray, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Tray, Menu } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+class QuickClass {
+  constructor() {
+  }
+  getConfigItem() {
+    return "";
+  }
+}
+const quickClass = new QuickClass();
+console.log(quickClass.getConfigItem());
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -28,28 +37,76 @@ function createWindow() {
   } else {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
   }
-  win.webContents.openDevTools();
   win.on("close", (event) => {
     if (!app.isQuiting) {
       event.preventDefault();
-      win.hide();
+      if (win) {
+        win.hide();
+      }
     }
   });
+}
+let settingsWindow;
+function createSettingsWindow() {
+  settingsWindow = new BrowserWindow({
+    width: 495,
+    height: 692,
+    // parent: win || undefined,
+    frame: false,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
+    }
+  });
+  if (VITE_DEV_SERVER_URL) {
+    settingsWindow.loadURL(VITE_DEV_SERVER_URL + "/settings");
+  } else {
+    settingsWindow.loadFile(path.join(RENDERER_DIST, "settings.html"));
+  }
 }
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
+function createTray() {
+  const trayIconPath = path.join(process.env.VITE_PUBLIC, "favicon-64.ico");
+  const tray = new Tray(trayIconPath);
+  tray.setToolTip("QuickClass Hub");
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "启动数据编辑器"
+    },
+    {
+      label: "DevTools",
+      click: () => {
+        if (win) {
+          win.webContents.openDevTools();
+          settingsWindow == null ? void 0 : settingsWindow.webContents.openDevTools();
+        }
+      }
+    },
+    { label: "设置", click: createSettingsWindow },
+    {
+      label: "退出",
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+    }
+  ]);
+  tray.setContextMenu(contextMenu);
+  tray.on("click", () => {
+    if (win) {
+      win.isVisible() ? win.hide() : win.show();
+    }
+  });
+}
 app.whenReady().then(() => {
   try {
-    const trayIconPath = path.join(process.env.VITE_PUBLIC, "favicon-64.ico");
-    const tray = new Tray(trayIconPath);
-    tray.setToolTip("QuickClass Hub");
-    const contextMenu = Menu.buildFromTemplate([
-      { label: "退出", role: "quit" }
-    ]);
-    tray.setContextMenu(contextMenu);
+    createTray();
     createWindow();
   } catch (error) {
     console.error("Error during app initialization:", error);
@@ -60,6 +117,17 @@ process.on("unhandledRejection", (reason) => {
 });
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
+});
+ipcMain.on("hide-main-window", () => {
+  if (win) {
+    win.hide();
+  }
+});
+ipcMain.on("close-settings-window", () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
 });
 export {
   MAIN_DIST,

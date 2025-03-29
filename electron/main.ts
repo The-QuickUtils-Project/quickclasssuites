@@ -1,20 +1,13 @@
-import { app, Tray, BrowserWindow, Menu } from 'electron'
+import { app, Tray, BrowserWindow, Menu, ipcMain } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { QuickClass } from '../QuickClass/QuickClass'
 
-// const require = createRequire(import.meta.url)
+const quickClass = new QuickClass();
+console.log(quickClass.getConfigItem());
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.mjs
-// │
 process.env.APP_ROOT = path.join(__dirname, '..')
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
@@ -26,12 +19,15 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 
 let win: BrowserWindow | null
 
+
+//主窗口创建
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, 'favicon-64.ico'),
     width: 1440,
     height: 1024,
     frame: false,
+    resizable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: true
@@ -50,7 +46,38 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 
-  win.webContents.openDevTools()
+  win.on('close', (event) => {
+    // @ts-ignore
+    if (!app.isQuiting) { // 检查是否正在退出
+      event.preventDefault()
+      if (win) {
+        win.hide();
+      }
+    }
+  })
+}
+
+let settingsWindow: BrowserWindow | null;
+//设置窗口创建
+function createSettingsWindow() {
+  settingsWindow = new BrowserWindow({
+    width: 495,
+    height: 692,
+    // parent: win || undefined,
+    frame: false,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.mjs'),
+      nodeIntegration: true,
+      contextIsolation: true
+    }
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    settingsWindow.loadURL(VITE_DEV_SERVER_URL+'/settings')
+  } else {
+    settingsWindow.loadFile(path.join(RENDERER_DIST, 'settings.html'))
+  }
 }
 
 
@@ -58,12 +85,6 @@ function createWindow() {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-    win = null
-  }
-})
 
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
@@ -73,15 +94,46 @@ app.on('activate', () => {
   }
 })
 
+
+
+function createTray() {
+  const trayIconPath = path.join(process.env.VITE_PUBLIC, 'favicon-64.ico'); // 确保路径正确
+  const tray = new Tray(trayIconPath); // 使用完整路径
+  tray.setToolTip('QuickClass Hub');
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '启动数据编辑器'
+    },
+    {
+      label: 'DevTools',
+      click: () => {
+        if (win) {
+          win.webContents.openDevTools();
+          settingsWindow?.webContents.openDevTools();
+        }
+      }
+    },
+    { label: '设置', click: createSettingsWindow },
+    { 
+      label: '退出', 
+      click: () => {
+        // @ts-ignore
+        app.isQuiting = true; // 标记应用正在退出
+        app.quit(); // 退出应用
+      } 
+    }
+  ]);
+  tray.setContextMenu(contextMenu);
+  tray.on('click', () => {
+    if (win) {
+      win.isVisible() ? win.hide() : win.show();
+    }
+  });
+}
+
 app.whenReady().then(() => {
   try {
-    const trayIconPath = path.join(process.env.VITE_PUBLIC, 'favicon-64.ico'); // 确保路径正确
-    const tray = new Tray(trayIconPath); // 使用完整路径
-    tray.setToolTip('QuickClass Hub');
-    const contextMenu = Menu.buildFromTemplate([
-      { label: '退出', role: 'quit' }
-    ]);
-    tray.setContextMenu(contextMenu);
+    createTray();
     createWindow();
   } catch (error) {
     console.error('Error during app initialization:', error);
@@ -89,10 +141,23 @@ app.whenReady().then(() => {
 });
 
 // 添加全局未捕获异常处理
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Promise Rejection:', reason);
 });
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
+
+ipcMain.on('hide-main-window', () => {
+  if (win) {
+    win.hide();
+  }
+})
+
+ipcMain.on('close-settings-window', () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
+})

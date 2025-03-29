@@ -9,7 +9,8 @@
   },
   "files": [
     "dist",
-    "dist-electron"
+    "dist-electron",
+    "QuickClass"
   ],
   "mac": {
     "target": [
@@ -26,6 +27,7 @@
         ]
       }
     ],
+    "icon":"./public/favicon-256.ico",
     "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
   },
   "nsis": {
