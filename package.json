@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@microsoft/clarity": "^1.0.0",
     "uuid": "^11.1.0",
     "vue": "^3.4.21",
     "vxe-table": "^4.12.2"

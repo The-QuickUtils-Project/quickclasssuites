@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // @ts-ignore
 import MainPage from './components/MainPage.vue';
+import clarity from '@microsoft/clarity';
+clarity.init('qw5zeanl76')
 function hideWindow() {
   // @ts-ignore
   window.electronApp.hideMainWindow();
