@@ -1,49 +1,36 @@
-name: Build Electron + Vite
+name: Build Electron App for Windows
 
 on:
-    push:
-        branches:
-            - dev
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-    build:
-        runs-on: windows-latest
+  build:
+    runs-on: windows-latest
 
-        steps:
-            # Checkout the repository
-              - name: Checkout code
-                uses: actions/checkout@v4
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-            # Set up Node.js
-              - name: Set up Node.js
-                uses: actions/setup-node@v4
-                with:
-                    node-version: 18
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
 
-            # Install dependencies
-              - name: Install dependencies
-                run: npm install
+    - name: Install dependencies
+      run: npm ci
 
-            # Build the project
-              - name: Build project
-                run: npm run build
+    - name: Build Project
+      run: npm run build
 
-            # Cache Electron binaries
-              - name: Cache Electron binaries
-                uses: actions/cache@v4
-                with:
-                    path: ~/.cache/electron
-                    key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json') }}
-                    restore-keys: |
-                        ${{ runner.os }}-electron-
-
-            # Package the Electron app
-              - name: Package Electron app
-                run: npm run electron:build
-
-            # Upload build artifacts
-              - name: Upload build artifacts
-                uses: actions/upload-artifact@v4
-                with:
-                    name: electron-build
-                    path: release/
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: electron-build
+        path: |
+          release/**/*.exe
+          !release/**/win-unpacked/**
+        retention-days: 5
