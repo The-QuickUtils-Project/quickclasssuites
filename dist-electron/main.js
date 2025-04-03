@@ -1,101 +1,154 @@
-import { app as t, BrowserWindow as c, ipcMain as d, Tray as u, Menu as h } from "electron";
-import { fileURLToPath as m } from "node:url";
-import o from "node:path";
-class w {
-  constructor() {
+var C = Object.defineProperty;
+var w = (i, e, o) => e in i ? C(i, e, { enumerable: !0, configurable: !0, writable: !0, value: o }) : i[e] = o;
+var f = (i, e, o) => w(i, typeof e != "symbol" ? e + "" : e, o);
+import { app as a, BrowserWindow as g, ipcMain as u, dialog as P, Tray as v, Menu as I } from "electron";
+import { fileURLToPath as T } from "node:url";
+import t from "node:path";
+import * as r from "fs";
+import * as p from "path";
+const b = "classhub";
+class y {
+  constructor(e) {
+    f(this, "configPath");
+    const o = process.env.APPDATA || "";
+    this.configPath = p.join(o, b, "storage", e);
+    const c = p.dirname(this.configPath);
+    r.existsSync(c) || r.mkdirSync(c, { recursive: !0 }), r.existsSync(this.configPath) || r.writeFileSync(this.configPath, JSON.stringify({}));
   }
-  getConfigItem() {
-    return "";
+  // 读取配置
+  loadConfig() {
+    try {
+      const e = r.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(e);
+    } catch (e) {
+      return console.error("读取配置失败:", e), {};
+    }
+  }
+  // 获取配置项
+  getConfigItem(e) {
+    return this.loadConfig()[e];
+  }
+  // 设置配置项
+  setConfigItem(e, o) {
+    const c = this.loadConfig();
+    c[e] = o, this.saveConfig(c);
+  }
+  // 删除配置项
+  deleteConfigItem(e) {
+    const o = this.loadConfig();
+    delete o[e], this.saveConfig(o);
+  }
+  // 保存配置
+  saveConfig(e) {
+    try {
+      r.writeFileSync(this.configPath, JSON.stringify(e, null, 2), "utf-8");
+    } catch (o) {
+      console.error("保存配置失败:", o);
+    }
   }
 }
-const g = new w();
-console.log(g.getConfigItem());
-const l = o.dirname(m(import.meta.url));
-process.env.APP_ROOT = o.join(l, "..");
-const s = process.env.VITE_DEV_SERVER_URL, b = o.join(process.env.APP_ROOT, "dist-electron"), a = o.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = s ? o.join(process.env.APP_ROOT, "public") : a;
-let e;
-function p() {
-  e = new c({
-    icon: o.join(process.env.VITE_PUBLIC, "favicon-64.ico"),
+class R {
+  constructor() {
+    f(this, "configSession");
+    this.configSession = new y("config.json");
+  }
+  getConfigItem(e) {
+    const o = this.configSession.getConfigItem(e);
+    return o || (console.log("Config item not found"), null);
+  }
+}
+const S = new R(), E = S.getConfigItem("DeveloperSays"), d = t.dirname(T(import.meta.url));
+process.env.APP_ROOT = t.join(d, "..");
+const l = process.env.VITE_DEV_SERVER_URL, V = t.join(process.env.APP_ROOT, "dist-electron"), h = t.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = l ? t.join(process.env.APP_ROOT, "public") : h;
+let n;
+function m() {
+  n = new g({
+    icon: t.join(process.env.VITE_PUBLIC, "favicon-64.ico"),
     width: 1440,
     height: 1024,
     frame: !1,
     resizable: !1,
     webPreferences: {
-      preload: o.join(l, "preload.mjs"),
-      nodeIntegration: !0
+      preload: t.join(d, "preload.mjs"),
+      nodeIntegration: !1
     }
-  }), e.webContents.on("did-finish-load", () => {
-    e == null || e.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), s ? e.loadURL(s) : e.loadFile(o.join(a, "index.html")), e.on("close", (n) => {
-    t.isQuiting || (n.preventDefault(), e && e.hide());
+  }), n.webContents.on("did-finish-load", () => {
+    n == null || n.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  }), l ? n.loadURL(l) : n.loadFile(t.join(h, "index.html")), n.on("close", (i) => {
+    a.isQuiting || (i.preventDefault(), n && n.hide());
+  }), P.showMessageBox(n, {
+    type: "info",
+    title: "QuickClass Hub",
+    message: "Config module test",
+    detail: E,
+    buttons: ["确定"]
   });
 }
-let i;
-function T() {
-  i = new c({
+let s;
+function _() {
+  s = new g({
     width: 495,
     height: 692,
     // parent: win || undefined,
     frame: !1,
     resizable: !1,
     webPreferences: {
-      preload: o.join(l, "preload.mjs"),
+      preload: t.join(d, "preload.mjs"),
       nodeIntegration: !0,
       contextIsolation: !0
     }
-  }), s ? i.loadURL(s + "/settings") : i.loadFile(o.join(a, "settings.html"));
+  }), l ? s.loadURL(l + "/settings") : s.loadFile(t.join(h, "settings.html"));
 }
-t.on("activate", () => {
-  c.getAllWindows().length === 0 && p();
+a.on("activate", () => {
+  g.getAllWindows().length === 0 && m();
 });
-function R() {
-  const n = o.join(process.env.VITE_PUBLIC, "favicon-64.ico"), r = new u(n);
-  r.setToolTip("QuickClass Hub");
-  const f = h.buildFromTemplate([
+function j() {
+  const i = t.join(process.env.VITE_PUBLIC, "favicon-64.ico"), e = new v(i);
+  e.setToolTip("QuickClass Hub");
+  const o = I.buildFromTemplate([
     {
       label: "启动数据编辑器"
     },
     {
       label: "DevTools",
       click: () => {
-        e && (e.webContents.openDevTools(), i == null || i.webContents.openDevTools());
+        n && (n.webContents.openDevTools(), s == null || s.webContents.openDevTools());
       }
     },
-    { label: "设置", click: T },
+    { label: "设置", click: _ },
     {
       label: "退出",
       click: () => {
-        t.isQuiting = !0, t.quit();
+        a.isQuiting = !0, a.quit();
       }
     }
   ]);
-  r.setContextMenu(f), r.on("click", () => {
-    e && (e.isVisible() ? e.hide() : e.show());
+  e.setContextMenu(o), e.on("click", () => {
+    n && (n.isVisible() ? n.hide() : n.show());
   });
 }
-t.whenReady().then(() => {
+a.whenReady().then(() => {
   try {
-    R(), p();
-  } catch (n) {
-    console.error("Error during app initialization:", n);
+    j(), m();
+  } catch (i) {
+    console.error("Error during app initialization:", i);
   }
 });
-process.on("unhandledRejection", (n) => {
-  console.error("Unhandled Promise Rejection:", n);
+process.on("unhandledRejection", (i) => {
+  console.error("Unhandled Promise Rejection:", i);
 });
-process.on("uncaughtException", (n) => {
-  console.error("Uncaught Exception:", n);
+process.on("uncaughtException", (i) => {
+  console.error("Uncaught Exception:", i);
 });
-d.on("hide-main-window", () => {
-  e && e.hide();
+u.on("hide-main-window", () => {
+  n && n.hide();
 });
-d.on("close-settings-window", () => {
-  i && (i.close(), i = null);
+u.on("close-settings-window", () => {
+  s && (s.close(), s = null);
 });
 export {
-  b as MAIN_DIST,
-  a as RENDERER_DIST,
-  s as VITE_DEV_SERVER_URL
+  V as MAIN_DIST,
+  h as RENDERER_DIST,
+  l as VITE_DEV_SERVER_URL
 };

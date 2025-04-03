@@ -3,14 +3,24 @@
        <noticeboard /> 
        <div id="rightArea">
             <ClassSchedule />
+            <GroupRank />
        </div>
+       <Dock>
+        <ToolChip toolName="开始上课" :toolAction="empty">
+            <img src="./dock/assets/startclass.svg" />
+        </ToolChip>
+       </Dock>
     </div>
 </template>
 
 <script setup>
 import noticeboard from './noticeboard/noticeboard.vue';
 import ClassSchedule from './classschedule/ClassSchedule.vue';
+import GroupRank from './grouprank/GroupRank.vue';
+import Dock from './dock/Dock.vue';
+import ToolChip from './dock/ToolChip/ToolChip.vue';
 const props = defineProps();
+function empty(){}
 </script>
 
 <style scoped>
@@ -20,7 +30,7 @@ const props = defineProps();
     justify-content: center;
     align-items: flex-start;
     align-content: flex-start;
-    gap: 49px 40px;
+    gap: 20px 10px;
     align-self: stretch;
     flex-wrap: wrap;
 }

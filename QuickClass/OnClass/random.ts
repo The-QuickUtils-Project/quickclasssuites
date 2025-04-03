@@ -1,28 +1,55 @@
-class UniqueDrawer {
-    pool: string[];
-    original: string[];
-    constructor(students: string[]) {
-      this.pool = [...students];
-      this.original = [...students];
-    }
-  
-    // 单次无放回抽取
-    drawWithoutReplacement(n: number) {
-      if(n > this.pool.length) throw new Error("Not enough candidates");
-      
-      const result = [];
-      for(let i = this.pool.length - 1; i >= this.pool.length - n; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [this.pool[i], this.pool[j]] = [this.pool[j], this.pool[i]];
-        result.push(this.pool[i]);
-      }
-      return result;
-    }
-  
-    // 重置池
-    reset() {
-      this.pool = [...this.original];
-    }
-  }
+import { UniqueDrawer } from "./common/random";
 
-export { UniqueDrawer };
+export default class Class{
+    students: students;
+    groups: groups;
+    constructor(studentData: studentData){
+        this.students = studentData.students;
+        this.groups = studentData.groups;
+    };
+    getRandomStudent(n: number){
+        const studentsUUID = Object.keys(this.students)
+        const drawer = new UniqueDrawer(studentsUUID);
+        const selectedStudents = drawer.drawWithoutReplacement(n);
+        const selectedStudentsData = selectedStudents.map(uuid => {
+            return {
+                name: this.students[uuid].name,
+                id: this.students[uuid].id,
+                group: this.students[uuid].group
+            }
+        });
+        return selectedStudentsData;
+    };
+    getRandomGroup(n: number){
+        const groupsUUID = Object.keys(this.groups)
+        const drawer = new UniqueDrawer(groupsUUID);
+        const selectedGroups = drawer.drawWithoutReplacement(n);
+        const selectedGroupsData = selectedGroups.map(uuid => {
+            return {
+                name: this.groups[uuid].name,
+                credit: this.groups[uuid].credit,
+                students: this.groups[uuid].students
+            }
+        });
+        return selectedGroupsData;
+    };
+    getRandomStuInEachGp(n: number){
+        const groupsUUID = Object.keys(this.groups);
+        const groupStudentMap: { [key: string]: string[] } = {};
+        groupsUUID.forEach(uuid => {
+                const drawer = new UniqueDrawer(this.groups[uuid].students);
+                const selectedStudents = drawer.drawWithoutReplacement(n);
+                groupStudentMap[uuid] = selectedStudents.map(studentUUID => {
+                    return this.students[studentUUID].name;
+            });
+        });
+        return groupStudentMap;
+    };
+    plusCredit(groupUUID: string, credit: number){
+        if(this.groups[groupUUID]){
+            this.groups[groupUUID].credit += credit;
+        }else{
+            throw new Error('Group not found');
+        }
+    };
+}

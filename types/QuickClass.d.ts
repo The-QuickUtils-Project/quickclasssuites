@@ -18,3 +18,12 @@ interface studentData {
     students: students,
     groups: groups
 }
+
+interface notices {
+    [uuid: string]: {
+        title: string,
+        content: string,
+        date: string,
+        isPinned: boolean
+    }
+}

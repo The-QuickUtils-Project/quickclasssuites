@@ -1,13 +1,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+const appName = 'classhub';
+
 export class Config {
     private configPath: string;
 
-    constructor(appName: string) {
+    constructor(fileName: string) {
         // 仅支持 Windows 平台，使用 APPDATA 目录
         const appDataPath = process.env.APPDATA || '';
-        this.configPath = path.join(appDataPath, appName, 'config.json');
+        this.configPath = path.join(appDataPath, appName, 'storage', fileName);
 
         // 确保配置目录存在
         const configDir = path.dirname(this.configPath);

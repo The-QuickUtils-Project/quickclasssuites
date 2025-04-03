@@ -20,6 +20,7 @@ function hideWindow() {
 </template>
 
 <style scoped>
+--Background: #F7F7F7;
 body, html{
   border-radius: 16px;
   background: var(--Background, #F7F7F7);

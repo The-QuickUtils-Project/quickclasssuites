@@ -1,16 +1,18 @@
 import { app, Tray, BrowserWindow, Menu, ipcMain } from 'electron'
-// import { createRequire } from 'node:module'
+// import { dialog } from 'electron';
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { QuickClass } from '../QuickClass/QuickClass'
 
 const quickClass = new QuickClass();
-console.log(quickClass.getConfigItem());
 
+
+
+// 开发/生产模式切换
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 process.env.APP_ROOT = path.join(__dirname, '..')
 
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
+
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
@@ -30,7 +32,7 @@ function createWindow() {
     resizable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
-      nodeIntegration: true
+      nodeIntegration: false
     },
   })
 
@@ -55,7 +57,17 @@ function createWindow() {
       }
     }
   })
+  //const devsays = quickClass.getConfigItem('DeveloperSays');
+  // dialog.showMessageBox(win, {
+  //   type: 'info',
+  //   title: 'QuickClass Hub',
+  //   message: 'Config module test',
+  //   detail: devsays,
+  //   buttons: ['确定']
+  // })
 }
+
+
 
 let settingsWindow: BrowserWindow | null;
 //设置窗口创建
@@ -80,15 +92,12 @@ function createSettingsWindow() {
   }
 }
 
+// 文件协议注册
 
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 
+// 并没有什么用的macOS兼容性代码
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
   }
@@ -96,6 +105,8 @@ app.on('activate', () => {
 
 
 
+
+// Create Tray icon and context menu
 function createTray() {
   const trayIconPath = path.join(process.env.VITE_PUBLIC, 'favicon-64.ico'); // 确保路径正确
   const tray = new Tray(trayIconPath); // 使用完整路径
@@ -131,6 +142,11 @@ function createTray() {
   });
 }
 
+
+
+
+
+// Init app
 app.whenReady().then(() => {
   try {
     createTray();
@@ -139,6 +155,12 @@ app.whenReady().then(() => {
     console.error('Error during app initialization:', error);
   }
 });
+
+
+
+
+
+
 
 // 添加全局未捕获异常处理
 process.on('unhandledRejection', (reason) => {
