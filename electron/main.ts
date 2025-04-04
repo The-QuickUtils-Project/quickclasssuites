@@ -1,12 +1,14 @@
-import { app, Tray, BrowserWindow, Menu, ipcMain } from 'electron'
+import { app, Tray, BrowserWindow, Menu, ipcMain, dialog } from 'electron'
 // import { dialog } from 'electron';
 import { fileURLToPath } from 'node:url'
-import path from 'node:path'
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { QuickClass } from '../QuickClass/QuickClass'
 
 const quickClass = new QuickClass();
 
-
+const extTool = quickClass.extTools;
+const noticeBoard = quickClass.Noticeboard;
 
 // 开发/生产模式切换
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -92,9 +94,85 @@ function createSettingsWindow() {
   }
 }
 
-// 文件协议注册
+let noticemanWindow: BrowserWindow | null;
+//公告窗口创建
+function createNoticeWindow() {
+  noticemanWindow = new BrowserWindow({
+    width: 919,
+    height: 662,
+    // parent: win || undefined,
+    frame: false,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.mjs'),
+      nodeIntegration: true,
+      contextIsolation: true
+    }
+  })
 
+  if (VITE_DEV_SERVER_URL) {
+    noticemanWindow.loadURL(VITE_DEV_SERVER_URL+'/noticeman')
+  } else {
+    noticemanWindow.loadFile(path.join(RENDERER_DIST, 'noticeman.html'))
+  }
+}
 
+ipcMain.handle('open-notice-window', async () => {
+  if (noticemanWindow) {
+    noticemanWindow.focus()
+  } else {
+    createNoticeWindow()
+  }
+})
+
+// 文件路径白名单校验
+function validatePath(userPath: string) {
+  const allowedPaths = [
+    path.join(app.getPath('appData'), 'classhub')
+  ]
+  
+  const isValid = allowedPaths.some(allowed => {
+    const relative = path.relative(allowed, userPath)
+    return !relative.startsWith('..') && !path.isAbsolute(relative)
+  })
+  
+  if (!isValid) throw new Error('非法路径访问')
+  return userPath
+}
+
+// Img转base64读取
+ipcMain.handle('read-image-to-base64', async (_, filePath) => {
+  try {
+    // 校验路径合法性并获取buffer
+    const validPath = validatePath(filePath);
+    const buffer = await fs.readFile(validPath)
+    return `data:image/${path.extname(filePath).slice(1)};base64,${buffer.toString('base64')}`
+  } catch (error) {
+    console.error('读取图片失败:', error)
+    return null
+  }
+})
+
+// Dock栏工具
+ipcMain.handle('launch-tool', async(_, toolId) => {
+  try {
+    extTool.startTool(toolId);
+  } catch (error) {
+    console.error('启动工具失败:', error)
+    dialog.showErrorBox('启动外部工具失败', '请检查工具配置或路径是否正确。')
+  }
+})
+
+ipcMain.handle('getNoticeList', async (_) => {
+  try { 
+    const noticeList = noticeBoard.notices;
+    console.log('获取公告列表成功:', noticeList)
+    return noticeList;
+  }catch (error) {
+    console.error('获取公告列表失败:', error)
+    return null;
+  }
+})
 
 // 并没有什么用的macOS兼容性代码
 app.on('activate', () => {
@@ -124,7 +202,14 @@ function createTray() {
         }
       }
     },
-    { label: '设置', click: createSettingsWindow },
+    { label: '设置', click: () => {
+      if(settingsWindow) {
+        settingsWindow.focus();
+      }
+      else {
+        createSettingsWindow();
+      }
+    } },
     { 
       label: '退出', 
       click: () => {

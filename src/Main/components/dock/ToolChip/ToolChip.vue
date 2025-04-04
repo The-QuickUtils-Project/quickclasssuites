@@ -1,6 +1,6 @@
 <template>
-    <div id="ToolChip">
-        <slot class="tool-icon" @click="toolAction"></slot>
+    <div id="ToolChip" @click="props.toolAction">
+        <slot class="tool-icon"></slot>
         <p class="tool-name">{{ props.toolName }}</p>
     </div>
 </template>
@@ -8,10 +8,6 @@
 <script setup lang="ts">
 const props = defineProps({
     toolName: {
-        type: String,
-        required: true
-    },
-    toolIcon: {
         type: String,
         required: true
     },

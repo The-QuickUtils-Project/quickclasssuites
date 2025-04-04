@@ -30,7 +30,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        settings: './settings.html'
+        settings: './settings.html',
+        noticeman: './noticeman.html',
       }
     }
   }

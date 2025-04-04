@@ -1,154 +1,379 @@
-var C = Object.defineProperty;
-var w = (i, e, o) => e in i ? C(i, e, { enumerable: !0, configurable: !0, writable: !0, value: o }) : i[e] = o;
-var f = (i, e, o) => w(i, typeof e != "symbol" ? e + "" : e, o);
-import { app as a, BrowserWindow as g, ipcMain as u, dialog as P, Tray as v, Menu as I } from "electron";
-import { fileURLToPath as T } from "node:url";
-import t from "node:path";
-import * as r from "fs";
-import * as p from "path";
-const b = "classhub";
-class y {
-  constructor(e) {
-    f(this, "configPath");
-    const o = process.env.APPDATA || "";
-    this.configPath = p.join(o, b, "storage", e);
-    const c = p.dirname(this.configPath);
-    r.existsSync(c) || r.mkdirSync(c, { recursive: !0 }), r.existsSync(this.configPath) || r.writeFileSync(this.configPath, JSON.stringify({}));
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+import { ipcMain, dialog, app, BrowserWindow, Tray, Menu } from "electron";
+import { fileURLToPath } from "node:url";
+import path$1 from "node:path";
+import fs$1 from "node:fs/promises";
+import * as fs from "fs";
+import * as path from "path";
+import { execFile } from "child_process";
+const appName$1 = "classhub";
+let Config$1 = class Config {
+  constructor(fileName) {
+    __publicField(this, "configPath");
+    const appDataPath = process.env.APPDATA || "";
+    this.configPath = path.join(appDataPath, appName$1, "storage", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify({}));
+    }
   }
   // 读取配置
   loadConfig() {
     try {
-      const e = r.readFileSync(this.configPath, "utf-8");
-      return JSON.parse(e);
-    } catch (e) {
-      return console.error("读取配置失败:", e), {};
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取配置失败:", error);
+      return {};
     }
   }
   // 获取配置项
-  getConfigItem(e) {
-    return this.loadConfig()[e];
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
   }
   // 设置配置项
-  setConfigItem(e, o) {
-    const c = this.loadConfig();
-    c[e] = o, this.saveConfig(c);
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
   }
   // 删除配置项
-  deleteConfigItem(e) {
-    const o = this.loadConfig();
-    delete o[e], this.saveConfig(o);
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
   }
   // 保存配置
-  saveConfig(e) {
+  saveConfig(config) {
     try {
-      r.writeFileSync(this.configPath, JSON.stringify(e, null, 2), "utf-8");
-    } catch (o) {
-      console.error("保存配置失败:", o);
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
+    }
+  }
+};
+class Noticeboard {
+  constructor() {
+    __publicField(this, "notices");
+    console.log("Noticeboard initialized");
+    const config = new Config$1("noticeboard.json");
+    const notices = config.loadConfig();
+    console.log("Loaded notices", notices);
+    this.notices = notices;
+  }
+  getNoticeList() {
+    const noticeList = Object.keys(this.notices).map((key) => {
+      return this.notices[key].title;
+    });
+    return noticeList;
+  }
+  getNoticebyId(id) {
+    const notice = this.notices[id];
+    if (!notice) {
+      console.log("Notice not found");
+      return null;
+    }
+    return notice;
+  }
+}
+const appName = "classhub";
+class Config2 {
+  constructor(fileName) {
+    __publicField(this, "configPath");
+    const appDataPath = process.env.APPDATA || "";
+    this.configPath = path.join(appDataPath, appName, "QuickClassResources", "Tool", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify({}));
+    }
+  }
+  loadConfig() {
+    try {
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取Tools配置失败:", error);
+      return {};
+    }
+  }
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
+  }
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
+  }
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
+  }
+  saveConfig(config) {
+    try {
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
     }
   }
 }
-class R {
+function DataLoader() {
+  const config = new Config2("extTools.json");
+  const toolsData = config.loadConfig();
+  return toolsData;
+}
+class EduTool {
   constructor() {
-    f(this, "configSession");
-    this.configSession = new y("config.json");
+    __publicField(this, "tools", {});
+    const toolsData = DataLoader();
+    this.tools = toolsData;
   }
-  getConfigItem(e) {
-    const o = this.configSession.getConfigItem(e);
-    return o || (console.log("Config item not found"), null);
+  startTool(id) {
+    console.log("Launching tool with ID:", id);
+    const tool = this.tools[id];
+    if (!tool) {
+      console.error("Tool not found:", id);
+      return;
+    }
+    console.log("Tool info:\nTool ID:" + id + "\nTool Name:" + tool.name + "\nTool Path:" + tool.path + "\nTool Icon:" + tool.icon + "\nTool Description:" + tool.description);
+    execFile(tool.path, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error launching tool: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Tool stderr: ${stderr}`);
+        return;
+      }
+      console.log(`Tool stdout: ${stdout}`);
+    });
   }
 }
-const S = new R(), E = S.getConfigItem("DeveloperSays"), d = t.dirname(T(import.meta.url));
-process.env.APP_ROOT = t.join(d, "..");
-const l = process.env.VITE_DEV_SERVER_URL, V = t.join(process.env.APP_ROOT, "dist-electron"), h = t.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = l ? t.join(process.env.APP_ROOT, "public") : h;
-let n;
-function m() {
-  n = new g({
-    icon: t.join(process.env.VITE_PUBLIC, "favicon-64.ico"),
+class QuickClass {
+  constructor() {
+    __publicField(this, "configSession");
+    __publicField(this, "onClassTool");
+    __publicField(this, "Noticeboard");
+    __publicField(this, "extTools");
+    this.configSession = new Config$1("config.json");
+    this.Noticeboard = new Noticeboard();
+    this.extTools = new EduTool();
+  }
+  getConfigItem(key) {
+    const content = this.configSession.getConfigItem(key);
+    if (!content) {
+      console.log("Config item not found");
+      return null;
+    }
+    return content;
+  }
+}
+const quickClass = new QuickClass();
+const extTool = quickClass.extTools;
+const noticeBoard = quickClass.Noticeboard;
+const __dirname = path$1.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path$1.join(__dirname, "..");
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path$1.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path$1.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path$1.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path$1.join(process.env.VITE_PUBLIC, "favicon-64.ico"),
     width: 1440,
     height: 1024,
-    frame: !1,
-    resizable: !1,
+    frame: false,
+    resizable: false,
     webPreferences: {
-      preload: t.join(d, "preload.mjs"),
-      nodeIntegration: !1
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: false
     }
-  }), n.webContents.on("did-finish-load", () => {
-    n == null || n.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), l ? n.loadURL(l) : n.loadFile(t.join(h, "index.html")), n.on("close", (i) => {
-    a.isQuiting || (i.preventDefault(), n && n.hide());
-  }), P.showMessageBox(n, {
-    type: "info",
-    title: "QuickClass Hub",
-    message: "Config module test",
-    detail: E,
-    buttons: ["确定"]
+  });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
+  }
+  win.on("close", (event) => {
+    if (!app.isQuiting) {
+      event.preventDefault();
+      if (win) {
+        win.hide();
+      }
+    }
   });
 }
-let s;
-function _() {
-  s = new g({
+let settingsWindow;
+function createSettingsWindow() {
+  settingsWindow = new BrowserWindow({
     width: 495,
     height: 692,
     // parent: win || undefined,
-    frame: !1,
-    resizable: !1,
+    frame: false,
+    resizable: false,
     webPreferences: {
-      preload: t.join(d, "preload.mjs"),
-      nodeIntegration: !0,
-      contextIsolation: !0
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
     }
-  }), l ? s.loadURL(l + "/settings") : s.loadFile(t.join(h, "settings.html"));
+  });
+  if (VITE_DEV_SERVER_URL) {
+    settingsWindow.loadURL(VITE_DEV_SERVER_URL + "/settings");
+  } else {
+    settingsWindow.loadFile(path$1.join(RENDERER_DIST, "settings.html"));
+  }
 }
-a.on("activate", () => {
-  g.getAllWindows().length === 0 && m();
+let noticemanWindow;
+function createNoticeWindow() {
+  noticemanWindow = new BrowserWindow({
+    width: 919,
+    height: 662,
+    // parent: win || undefined,
+    frame: false,
+    resizable: false,
+    webPreferences: {
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
+    }
+  });
+  if (VITE_DEV_SERVER_URL) {
+    noticemanWindow.loadURL(VITE_DEV_SERVER_URL + "/noticeman");
+  } else {
+    noticemanWindow.loadFile(path$1.join(RENDERER_DIST, "noticeman.html"));
+  }
+}
+ipcMain.handle("open-notice-window", async () => {
+  if (noticemanWindow) {
+    noticemanWindow.focus();
+  } else {
+    createNoticeWindow();
+  }
 });
-function j() {
-  const i = t.join(process.env.VITE_PUBLIC, "favicon-64.ico"), e = new v(i);
-  e.setToolTip("QuickClass Hub");
-  const o = I.buildFromTemplate([
+function validatePath(userPath) {
+  const allowedPaths = [
+    path$1.join(app.getPath("appData"), "classhub")
+  ];
+  const isValid = allowedPaths.some((allowed) => {
+    const relative = path$1.relative(allowed, userPath);
+    return !relative.startsWith("..") && !path$1.isAbsolute(relative);
+  });
+  if (!isValid) throw new Error("非法路径访问");
+  return userPath;
+}
+ipcMain.handle("read-image-to-base64", async (_, filePath) => {
+  try {
+    const validPath = validatePath(filePath);
+    const buffer = await fs$1.readFile(validPath);
+    return `data:image/${path$1.extname(filePath).slice(1)};base64,${buffer.toString("base64")}`;
+  } catch (error) {
+    console.error("读取图片失败:", error);
+    return null;
+  }
+});
+ipcMain.handle("launch-tool", async (_, toolId) => {
+  try {
+    extTool.startTool(toolId);
+  } catch (error) {
+    console.error("启动工具失败:", error);
+    dialog.showErrorBox("启动外部工具失败", "请检查工具配置或路径是否正确。");
+  }
+});
+ipcMain.handle("getNoticeList", async (_) => {
+  try {
+    const noticeList = noticeBoard.notices;
+    console.log("获取公告列表成功:", noticeList);
+    return noticeList;
+  } catch (error) {
+    console.error("获取公告列表失败:", error);
+    return null;
+  }
+});
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+function createTray() {
+  const trayIconPath = path$1.join(process.env.VITE_PUBLIC, "favicon-64.ico");
+  const tray = new Tray(trayIconPath);
+  tray.setToolTip("QuickClass Hub");
+  const contextMenu = Menu.buildFromTemplate([
     {
       label: "启动数据编辑器"
     },
     {
       label: "DevTools",
       click: () => {
-        n && (n.webContents.openDevTools(), s == null || s.webContents.openDevTools());
+        if (win) {
+          win.webContents.openDevTools();
+          settingsWindow == null ? void 0 : settingsWindow.webContents.openDevTools();
+        }
       }
     },
-    { label: "设置", click: _ },
+    { label: "设置", click: () => {
+      if (settingsWindow) {
+        settingsWindow.focus();
+      } else {
+        createSettingsWindow();
+      }
+    } },
     {
       label: "退出",
       click: () => {
-        a.isQuiting = !0, a.quit();
+        app.isQuiting = true;
+        app.quit();
       }
     }
   ]);
-  e.setContextMenu(o), e.on("click", () => {
-    n && (n.isVisible() ? n.hide() : n.show());
+  tray.setContextMenu(contextMenu);
+  tray.on("click", () => {
+    if (win) {
+      win.isVisible() ? win.hide() : win.show();
+    }
   });
 }
-a.whenReady().then(() => {
+app.whenReady().then(() => {
   try {
-    j(), m();
-  } catch (i) {
-    console.error("Error during app initialization:", i);
+    createTray();
+    createWindow();
+  } catch (error) {
+    console.error("Error during app initialization:", error);
   }
 });
-process.on("unhandledRejection", (i) => {
-  console.error("Unhandled Promise Rejection:", i);
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Promise Rejection:", reason);
 });
-process.on("uncaughtException", (i) => {
-  console.error("Uncaught Exception:", i);
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
 });
-u.on("hide-main-window", () => {
-  n && n.hide();
+ipcMain.on("hide-main-window", () => {
+  if (win) {
+    win.hide();
+  }
 });
-u.on("close-settings-window", () => {
-  s && (s.close(), s = null);
+ipcMain.on("close-settings-window", () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
 });
 export {
-  V as MAIN_DIST,
-  h as RENDERER_DIST,
-  l as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };

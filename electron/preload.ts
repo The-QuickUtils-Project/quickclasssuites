@@ -27,5 +27,10 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 contextBridge.exposeInMainWorld('electronApp', {
   hideMainWindow() {
     ipcRenderer.send('hide-main-window')
-  }
+  },
+})
+
+contextBridge.exposeInMainWorld('resource', {
+  getBase64Image: (path: string) => ipcRenderer.invoke('read-image-to-base64', path),
+  launchTool: (id: string) => ipcRenderer.invoke('launch-tool', id),
 })

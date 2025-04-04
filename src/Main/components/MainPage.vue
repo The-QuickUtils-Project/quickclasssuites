@@ -6,7 +6,7 @@
             <GroupRank />
        </div>
        <Dock>
-        <ToolChip toolName="开始上课" :toolAction="empty">
+        <ToolChip toolName="开始上课" :toolAction="startClass">
             <img src="./dock/assets/startclass.svg" />
         </ToolChip>
        </Dock>
@@ -20,7 +20,9 @@ import GroupRank from './grouprank/GroupRank.vue';
 import Dock from './dock/Dock.vue';
 import ToolChip from './dock/ToolChip/ToolChip.vue';
 const props = defineProps();
-function empty(){}
+function startClass() {
+    window.resource.launchTool('com.seewo.easinote')
+}
 </script>
 
 <style scoped>
