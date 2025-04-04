@@ -9,6 +9,7 @@ const quickClass = new QuickClass();
 
 const extTool = quickClass.extTools;
 const noticeBoard = quickClass.Noticeboard;
+const OnClass = quickClass.onClassTool;
 
 // 开发/生产模式切换
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -88,7 +89,7 @@ function createSettingsWindow() {
   })
 
   if (VITE_DEV_SERVER_URL) {
-    settingsWindow.loadURL(VITE_DEV_SERVER_URL+'/settings')
+    settingsWindow.loadURL(VITE_DEV_SERVER_URL + '/settings')
   } else {
     settingsWindow.loadFile(path.join(RENDERER_DIST, 'settings.html'))
   }
@@ -111,7 +112,7 @@ function createNoticeWindow() {
   })
 
   if (VITE_DEV_SERVER_URL) {
-    noticemanWindow.loadURL(VITE_DEV_SERVER_URL+'/noticeman')
+    noticemanWindow.loadURL(VITE_DEV_SERVER_URL + '/noticeman')
   } else {
     noticemanWindow.loadFile(path.join(RENDERER_DIST, 'noticeman.html'))
   }
@@ -125,17 +126,47 @@ ipcMain.handle('open-notice-window', async () => {
   }
 })
 
+ipcMain.on('close-noticeman-window', () => {
+  if (noticemanWindow) {
+    noticemanWindow.close()
+    noticemanWindow = null
+  }
+})
+
+// OnClass组件Handler
+ipcMain.handle('getGroupsInfo', async () => {
+  try {
+    const groupsInfo = OnClass.getGroupList();
+    console.log('获取分组信息成功:', groupsInfo)
+    return groupsInfo;
+  } catch (error) {
+    console.error('获取班级信息失败:', error)
+    return null;
+  }
+})
+
+ipcMain.handle('getStudentsInfo', async () => {
+  try{
+    const studentsInfo = OnClass.studentList;
+    console.log('获取学生信息成功:', studentsInfo)
+    return studentsInfo;
+  }catch (error) {
+    console.error('获取学生信息失败:', error)
+    return null;
+  }
+})
+
 // 文件路径白名单校验
 function validatePath(userPath: string) {
   const allowedPaths = [
     path.join(app.getPath('appData'), 'classhub')
   ]
-  
+
   const isValid = allowedPaths.some(allowed => {
     const relative = path.relative(allowed, userPath)
     return !relative.startsWith('..') && !path.isAbsolute(relative)
   })
-  
+
   if (!isValid) throw new Error('非法路径访问')
   return userPath
 }
@@ -154,7 +185,7 @@ ipcMain.handle('read-image-to-base64', async (_, filePath) => {
 })
 
 // Dock栏工具
-ipcMain.handle('launch-tool', async(_, toolId) => {
+ipcMain.handle('launch-tool', async (_, toolId) => {
   try {
     extTool.startTool(toolId);
   } catch (error) {
@@ -164,11 +195,11 @@ ipcMain.handle('launch-tool', async(_, toolId) => {
 })
 
 ipcMain.handle('getNoticeList', async (_) => {
-  try { 
+  try {
     const noticeList = noticeBoard.notices;
     console.log('获取公告列表成功:', noticeList)
     return noticeList;
-  }catch (error) {
+  } catch (error) {
     console.error('获取公告列表失败:', error)
     return null;
   }
@@ -199,24 +230,27 @@ function createTray() {
         if (win) {
           win.webContents.openDevTools();
           settingsWindow?.webContents.openDevTools();
+          noticemanWindow?.webContents.openDevTools();
         }
       }
     },
-    { label: '设置', click: () => {
-      if(settingsWindow) {
-        settingsWindow.focus();
+    {
+      label: '设置', click: () => {
+        if (settingsWindow) {
+          settingsWindow.focus();
+        }
+        else {
+          createSettingsWindow();
+        }
       }
-      else {
-        createSettingsWindow();
-      }
-    } },
-    { 
-      label: '退出', 
+    },
+    {
+      label: '退出',
       click: () => {
         // @ts-ignore
         app.isQuiting = true; // 标记应用正在退出
         app.quit(); // 退出应用
-      } 
+      }
     }
   ]);
   tray.setContextMenu(contextMenu);

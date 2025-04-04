@@ -1,16 +1,18 @@
 import { Config } from './Config/configLoader';
 import Noticeboard from './Hub/Noticeboard/app';
 import { EduTool } from './Hub/Dock/ExtEduToolManager';
+import { OnClass } from './OnClass/OnClass';
 
 export class QuickClass{
     public configSession: Config;
-    public onClassTool: any;
+    public onClassTool: OnClass;
     public Noticeboard: Noticeboard;
     public extTools: any;
     constructor(){
         this.configSession = new Config('config.json');
         this.Noticeboard = new Noticeboard();
         this.extTools = new EduTool();
+        this.onClassTool = new OnClass();
     };
     getConfigItem(key: string): any{
         const content = this.configSession.getConfigItem(key)

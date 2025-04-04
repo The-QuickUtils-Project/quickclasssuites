@@ -66,7 +66,6 @@ html, body {
     padding: 0;
     width: 100%;
     overflow: hidden; // 隐藏滚动条
-    
 }
 
 #App {

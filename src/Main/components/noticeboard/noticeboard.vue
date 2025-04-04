@@ -25,7 +25,7 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
             noticeElement.onclick = () => {
                 window.ipcRenderer.invoke('open-notice-window');
             };
-            noticeElement.innerHTML = `<p id="noticeTitle">${notices.value[notice].title}</p><p id="noticeTime">${notices.value[notice].date}</p>`;
+            noticeElement.innerHTML = `<p class="noticeTitle">${notices.value[notice].title}</p><p class="noticeTime">${notices.value[notice].date}</p><p id="noticeContent">${notices.value[notice].content}</p>`;
             // @ts-ignore
             document.getElementById('latest_notices').appendChild(noticeElement);
         });
@@ -35,6 +35,9 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
 </script>
 
 <style lang="less">
+p {
+    margin: 0;
+}
 .title {
     width: 316px;
     color: #000;
@@ -45,7 +48,8 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
     line-height: normal;
     margin: 0px;
 }
-.noticeboard{
+
+.noticeboard {
     display: flex;
     width: 383px;
     height: 543px;
@@ -84,7 +88,7 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
     cursor: pointer;
 }
 
-#noticeTitle {
+.noticeTitle {
     color: #000;
     text-align: center;
     font-family: MiSans;
@@ -95,7 +99,7 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
     margin: 0px;
 }
 
-#noticeTime {
+.noticeTime {
     color: rgba(0, 0, 0, 0.50);
     text-align: center;
     font-family: MiSans;
@@ -113,6 +117,16 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
     font-size: 24px;
     font-style: normal;
     font-weight: 520;
+    line-height: normal;
+}
+
+.noticeContent {
+    align-self: stretch;
+    color: #000;
+    font-family: MiSans;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 450;
     line-height: normal;
 }
 </style>

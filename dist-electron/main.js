@@ -8,12 +8,12 @@ import fs$1 from "node:fs/promises";
 import * as fs from "fs";
 import * as path from "path";
 import { execFile } from "child_process";
-const appName$1 = "classhub";
-let Config$1 = class Config {
+const appName$2 = "classhub";
+let Config$2 = class Config {
   constructor(fileName) {
     __publicField(this, "configPath");
     const appDataPath = process.env.APPDATA || "";
-    this.configPath = path.join(appDataPath, appName$1, "storage", fileName);
+    this.configPath = path.join(appDataPath, appName$2, "storage", fileName);
     const configDir = path.dirname(this.configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
@@ -62,7 +62,7 @@ class Noticeboard {
   constructor() {
     __publicField(this, "notices");
     console.log("Noticeboard initialized");
-    const config = new Config$1("noticeboard.json");
+    const config = new Config$2("noticeboard.json");
     const notices = config.loadConfig();
     console.log("Loaded notices", notices);
     this.notices = notices;
@@ -82,12 +82,12 @@ class Noticeboard {
     return notice;
   }
 }
-const appName = "classhub";
-class Config2 {
+const appName$1 = "classhub";
+let Config$1 = class Config2 {
   constructor(fileName) {
     __publicField(this, "configPath");
     const appDataPath = process.env.APPDATA || "";
-    this.configPath = path.join(appDataPath, appName, "QuickClassResources", "Tool", fileName);
+    this.configPath = path.join(appDataPath, appName$1, "QuickClassResources", "Tool", fileName);
     const configDir = path.dirname(this.configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
@@ -126,16 +126,16 @@ class Config2 {
       console.error("保存配置失败:", error);
     }
   }
-}
-function DataLoader() {
-  const config = new Config2("extTools.json");
+};
+function DataLoader$1() {
+  const config = new Config$1("extTools.json");
   const toolsData = config.loadConfig();
   return toolsData;
 }
 class EduTool {
   constructor() {
     __publicField(this, "tools", {});
-    const toolsData = DataLoader();
+    const toolsData = DataLoader$1();
     this.tools = toolsData;
   }
   startTool(id) {
@@ -159,15 +159,113 @@ class EduTool {
     });
   }
 }
+const appName = "classhub";
+class Config3 {
+  constructor(fileName, initContent = {}) {
+    __publicField(this, "configPath");
+    const appDataPath = process.env.APPDATA || "";
+    this.configPath = path.join(appDataPath, appName, "QuickClassResources", "Archieve", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify(initContent));
+    }
+  }
+  loadConfig() {
+    try {
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取存档失败:", error);
+      return {};
+    }
+  }
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
+  }
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
+  }
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
+  }
+  saveConfig(config) {
+    try {
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
+    }
+  }
+}
+function DataLoader() {
+  const data = new Config3("classinfo.json", {
+    students: {},
+    groups: {}
+  });
+  const classData = data.loadConfig();
+  return classData;
+}
+let OnClass$1 = class OnClass {
+  constructor() {
+    __publicField(this, "studentData");
+    __publicField(this, "studentList");
+    __publicField(this, "groupList");
+    this.studentData = DataLoader();
+    this.studentList = this.studentData.students;
+    this.groupList = this.studentData.groups;
+    console.log("groups", this.groupList);
+  }
+  getStudentList(groupId) {
+    if (groupId) {
+      return this.groupList[groupId].students;
+    }
+    return Object.keys(this.studentList);
+  }
+  getGroupList() {
+    return this.groupList;
+  }
+  getStudentInfo(studentId) {
+    const student = this.studentList[studentId];
+    if (!student) {
+      console.log("Student not found");
+      return null;
+    }
+    return student;
+  }
+  getGroupInfo(groupId) {
+    const group = this.groupList[groupId];
+    if (!group) {
+      console.log("Group not found");
+      return null;
+    }
+    return group;
+  }
+  getStudentGroup(studentId) {
+    const student = this.studentList[studentId];
+    if (!student) {
+      console.log("Student not found");
+      return null;
+    }
+    return student.group;
+  }
+};
 class QuickClass {
   constructor() {
     __publicField(this, "configSession");
     __publicField(this, "onClassTool");
     __publicField(this, "Noticeboard");
     __publicField(this, "extTools");
-    this.configSession = new Config$1("config.json");
+    this.configSession = new Config$2("config.json");
     this.Noticeboard = new Noticeboard();
     this.extTools = new EduTool();
+    this.onClassTool = new OnClass$1();
   }
   getConfigItem(key) {
     const content = this.configSession.getConfigItem(key);
@@ -181,6 +279,7 @@ class QuickClass {
 const quickClass = new QuickClass();
 const extTool = quickClass.extTools;
 const noticeBoard = quickClass.Noticeboard;
+const OnClass2 = quickClass.onClassTool;
 const __dirname = path$1.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path$1.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -264,6 +363,32 @@ ipcMain.handle("open-notice-window", async () => {
     createNoticeWindow();
   }
 });
+ipcMain.on("close-noticeman-window", () => {
+  if (noticemanWindow) {
+    noticemanWindow.close();
+    noticemanWindow = null;
+  }
+});
+ipcMain.handle("getGroupsInfo", async () => {
+  try {
+    const groupsInfo = OnClass2.getGroupList();
+    console.log("获取分组信息成功:", groupsInfo);
+    return groupsInfo;
+  } catch (error) {
+    console.error("获取班级信息失败:", error);
+    return null;
+  }
+});
+ipcMain.handle("getStudentsInfo", async () => {
+  try {
+    const studentsInfo = OnClass2.studentList;
+    console.log("获取学生信息成功:", studentsInfo);
+    return studentsInfo;
+  } catch (error) {
+    console.error("获取学生信息失败:", error);
+    return null;
+  }
+});
 function validatePath(userPath) {
   const allowedPaths = [
     path$1.join(app.getPath("appData"), "classhub")
@@ -322,16 +447,20 @@ function createTray() {
         if (win) {
           win.webContents.openDevTools();
           settingsWindow == null ? void 0 : settingsWindow.webContents.openDevTools();
+          noticemanWindow == null ? void 0 : noticemanWindow.webContents.openDevTools();
         }
       }
     },
-    { label: "设置", click: () => {
-      if (settingsWindow) {
-        settingsWindow.focus();
-      } else {
-        createSettingsWindow();
+    {
+      label: "设置",
+      click: () => {
+        if (settingsWindow) {
+          settingsWindow.focus();
+        } else {
+          createSettingsWindow();
+        }
       }
-    } },
+    },
     {
       label: "退出",
       click: () => {

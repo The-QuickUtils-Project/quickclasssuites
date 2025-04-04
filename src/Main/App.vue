@@ -1,8 +1,27 @@
 <script setup lang="ts">
 // @ts-ignore
+import { ref } from 'vue';
+// @ts-ignore
 import MainPage from './components/MainPage.vue';
+// @ts-ignore
+import OnClass from './components/OnClass.vue';
 import clarity from '@microsoft/clarity';
 clarity.init('qw5zeanl76')
+
+const components = {
+  MainPage,
+  OnClass,
+};
+const currentPage = ref('MainPage');
+
+function changePage() {
+  if(currentPage.value === 'MainPage') {
+    currentPage.value = 'OnClass';
+  } else {
+    currentPage.value = 'MainPage';
+  }
+}
+
 function hideWindow() {
   // @ts-ignore
   window.electronApp.hideMainWindow();
@@ -15,7 +34,7 @@ function hideWindow() {
       <img alt="quickclass-icon" id="icon" src="./assets/svgicon.svg" />
       <img id="close_btn" src="./assets/Images/shared/close.png" alt="close" @click="hideWindow"/>
     </div>
-    <MainPage />
+    <component :is="components[currentPage]" @changePage="changePage"></component>
   </div>
 </template>
 
@@ -33,7 +52,6 @@ body, html{
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
-  gap: 40.8px;
   border-radius: 16px;
   background: var(--Background, #F7F7F7);
   overflow: hidden;
@@ -41,7 +59,7 @@ body, html{
 
 #titlebar {
   width: 100%;
-  height: 110px;
+  max-height: 110px;
   -webkit-app-region: drag;
 }
 

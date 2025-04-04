@@ -1,8 +1,8 @@
 interface students {
     [uuid: string]: {
         name: string,
-        id: string,
         group: string,
+        avatar: string,
     }
 }
 

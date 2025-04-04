@@ -19,9 +19,10 @@ import ClassSchedule from './classschedule/ClassSchedule.vue';
 import GroupRank from './grouprank/GroupRank.vue';
 import Dock from './dock/Dock.vue';
 import ToolChip from './dock/ToolChip/ToolChip.vue';
-const props = defineProps();
+const emit = defineEmits(['changePage']);
 function startClass() {
-    window.resource.launchTool('com.seewo.easinote')
+    // window.resource.launchTool('com.seewo.easinote')
+    emit('changePage')
 }
 </script>
 

@@ -23,5 +23,3 @@ function addStudent(
     return GlobalData;
 }
 
-DataLoader(testData);
-addStudent("2minRain", "g1");
