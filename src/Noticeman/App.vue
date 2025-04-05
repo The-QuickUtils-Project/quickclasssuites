@@ -59,6 +59,7 @@ body {
     padding: 0;
     width: 100%;
     overflow: hidden; // 隐藏滚动条
+    background: var(--Background, #F7F7F7);
 }
 
 p {
@@ -72,7 +73,7 @@ p {
     flex-direction: column;
     align-items: center;
     gap: 11px;
-    background: var(--Background, #F7F7F7);
+    background: #F7F7F7;
 }
 
 #titlebar {

@@ -2,8 +2,8 @@ import { app, Tray, BrowserWindow, Menu, ipcMain, dialog } from 'electron'
 // import { dialog } from 'electron';
 import { fileURLToPath } from 'node:url'
 import path from 'node:path';
-import fs from 'node:fs/promises';
 import { QuickClass } from '../QuickClass/QuickClass'
+import { Console } from 'node:console';
 
 const quickClass = new QuickClass();
 
@@ -133,7 +133,7 @@ ipcMain.on('close-noticeman-window', () => {
   }
 })
 
-// OnClass组件Handler
+// OnClass组件Handlers
 ipcMain.handle('getGroupsInfo', async () => {
   try {
     const groupsInfo = OnClass.getGroupList();
@@ -157,32 +157,32 @@ ipcMain.handle('getStudentsInfo', async () => {
 })
 
 // 文件路径白名单校验
-function validatePath(userPath: string) {
-  const allowedPaths = [
-    path.join(app.getPath('appData'), 'classhub')
-  ]
+// function validatePath(userPath: string) {
+//   const allowedPaths = [
+//     path.join(app.getPath('appData'), 'classhub')
+//   ]
 
-  const isValid = allowedPaths.some(allowed => {
-    const relative = path.relative(allowed, userPath)
-    return !relative.startsWith('..') && !path.isAbsolute(relative)
-  })
+//   const isValid = allowedPaths.some(allowed => {
+//     const relative = path.relative(allowed, userPath)
+//     return !relative.startsWith('..') && !path.isAbsolute(relative)
+//   })
 
-  if (!isValid) throw new Error('非法路径访问')
-  return userPath
-}
+//   if (!isValid) throw new Error('非法路径访问')
+//   return userPath
+// }
 
 // Img转base64读取
-ipcMain.handle('read-image-to-base64', async (_, filePath) => {
-  try {
-    // 校验路径合法性并获取buffer
-    const validPath = validatePath(filePath);
-    const buffer = await fs.readFile(validPath)
-    return `data:image/${path.extname(filePath).slice(1)};base64,${buffer.toString('base64')}`
-  } catch (error) {
-    console.error('读取图片失败:', error)
-    return null
-  }
-})
+// ipcMain.handle('read-image-to-base64', async (_, filePath) => {
+//   try {
+//     // 校验路径合法性并获取buffer
+//     const validPath = validatePath(filePath);
+//     const buffer = await fs.readFile(validPath)
+//     return `data:image/${path.extname(filePath).slice(1)};base64,${buffer.toString('base64')}`
+//   } catch (error) {
+//     console.error('读取图片失败:', error)
+//     return null
+//   }
+// })
 
 // Dock栏工具
 ipcMain.handle('launch-tool', async (_, toolId) => {
@@ -191,6 +191,25 @@ ipcMain.handle('launch-tool', async (_, toolId) => {
   } catch (error) {
     console.error('启动工具失败:', error)
     dialog.showErrorBox('启动外部工具失败', '请检查工具配置或路径是否正确。')
+  }
+})
+
+ipcMain.handle('getToolList', async () => {
+  try {
+    console.log('gotTodoList', extTool.getToolList())
+    return extTool.getToolList()
+  }catch (error) {
+    console.error('获取工具列表失败:', error) 
+  }
+});
+
+ipcMain.handle('getIconBase64', (_, toolId) =>{
+  try {
+    const base64 = extTool.getIconData(toolId);
+    return base64;
+  } catch (error) {
+    console.error('获取工具图标失败:', error)
+    return null;
   }
 })
 

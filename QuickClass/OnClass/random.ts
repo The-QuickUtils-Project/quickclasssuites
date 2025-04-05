@@ -1,6 +1,6 @@
 import { UniqueDrawer } from "./common/random";
 
-export default class Class{
+export default class ClassRandom{
     students: students;
     groups: groups;
     constructor(studentData: studentData){
@@ -14,7 +14,6 @@ export default class Class{
         const selectedStudentsData = selectedStudents.map(uuid => {
             return {
                 name: this.students[uuid].name,
-                id: this.students[uuid].id,
                 group: this.students[uuid].group
             }
         });
@@ -44,12 +43,5 @@ export default class Class{
             });
         });
         return groupStudentMap;
-    };
-    plusCredit(groupUUID: string, credit: number){
-        if(this.groups[groupUUID]){
-            this.groups[groupUUID].credit += credit;
-        }else{
-            throw new Error('Group not found');
-        }
     };
 }

@@ -1,13 +1,13 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { ipcMain, dialog, app, BrowserWindow, Tray, Menu } from "electron";
+import { app, ipcMain, dialog, BrowserWindow, Tray, Menu } from "electron";
 import { fileURLToPath } from "node:url";
 import path$1 from "node:path";
-import fs$1 from "node:fs/promises";
 import * as fs from "fs";
 import * as path from "path";
 import { execFile } from "child_process";
+import fs$1 from "node:fs/promises";
 const appName$2 = "classhub";
 let Config$2 = class Config {
   constructor(fileName) {
@@ -132,11 +132,41 @@ function DataLoader$1() {
   const toolsData = config.loadConfig();
   return toolsData;
 }
+function validatePath(userPath) {
+  const allowedPaths = [
+    path$1.join(app.getPath("appData"), "classhub")
+  ];
+  const isValid = allowedPaths.some((allowed) => {
+    const relative = path$1.relative(allowed, userPath);
+    return !relative.startsWith("..") && !path$1.isAbsolute(relative);
+  });
+  if (!isValid) throw new Error("非法路径访问");
+  return userPath;
+}
+async function read_image_to_base64(filePath) {
+  try {
+    const validPath = validatePath(filePath);
+    const buffer = await fs$1.readFile(validPath);
+    const data = `data:image/png;base64,${buffer.toString("base64")}`;
+    console.log("ReadImgSuccessful:", data);
+    return data;
+  } catch (error) {
+    console.error("读取图片失败:", error);
+    return null;
+  }
+}
 class EduTool {
   constructor() {
     __publicField(this, "tools", {});
+    __publicField(this, "toolIconCache", {});
     const toolsData = DataLoader$1();
     this.tools = toolsData;
+    Object.keys(this.tools).forEach(async (id) => {
+      const base64 = await this.getBase64Icon(id);
+      if (base64) {
+        this.toolIconCache[id] = base64;
+      }
+    });
   }
   startTool(id) {
     console.log("Launching tool with ID:", id);
@@ -145,7 +175,7 @@ class EduTool {
       console.error("Tool not found:", id);
       return;
     }
-    console.log("Tool info:\nTool ID:" + id + "\nTool Name:" + tool.name + "\nTool Path:" + tool.path + "\nTool Icon:" + tool.icon + "\nTool Description:" + tool.description);
+    console.log("Tool info:\nTool ID:" + id + "\nTool Name:" + tool.name + "\nTool Path:" + tool.path + "\nTool Description:" + tool.description);
     execFile(tool.path, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error launching tool: ${error.message}`);
@@ -157,6 +187,48 @@ class EduTool {
       }
       console.log(`Tool stdout: ${stdout}`);
     });
+  }
+  getToolList() {
+    return this.tools;
+  }
+  getToolInfo(id) {
+    const tool = this.tools[id];
+    if (!tool) {
+      console.error("Tool not found:", id);
+      return null;
+    }
+    return tool;
+  }
+  async getBase64Icon(id) {
+    const tool = this.tools[id];
+    if (!tool) {
+      console.error("Tool not found:", id);
+      return null;
+    }
+    const appDataPath = process.env.APPDATA || "";
+    const iconPath = path$1.join(appDataPath, "classhub", "QuickClassResources", "Tool", "Icons", id + ".png");
+    try {
+      const base64 = await read_image_to_base64(iconPath);
+      if (base64) {
+        console.log("[ExtToolHost] ReadImgSuccessful:", base64);
+        this.toolIconCache[id] = base64;
+        return base64;
+      } else {
+        console.error("Failed to convert image to base64:", iconPath);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error reading image:", error);
+      return null;
+    }
+  }
+  getIconData(id) {
+    if (this.toolIconCache[id]) {
+      return this.toolIconCache[id];
+    } else {
+      console.error("Icon not found in cache:", id);
+      return null;
+    }
   }
 }
 const appName = "classhub";
@@ -212,15 +284,85 @@ function DataLoader() {
   const classData = data.loadConfig();
   return classData;
 }
+class UniqueDrawer {
+  constructor(students) {
+    __publicField(this, "pool");
+    __publicField(this, "original");
+    this.pool = [...students];
+    this.original = [...students];
+  }
+  // 单次无放回抽取
+  drawWithoutReplacement(n) {
+    if (n > this.pool.length) throw new Error("Not enough candidates");
+    const result = [];
+    for (let i = this.pool.length - 1; i >= this.pool.length - n; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.pool[i], this.pool[j]] = [this.pool[j], this.pool[i]];
+      result.push(this.pool[i]);
+    }
+    return result;
+  }
+  // 重置池
+  reset() {
+    this.pool = [...this.original];
+  }
+}
+class ClassRandom {
+  constructor(studentData) {
+    __publicField(this, "students");
+    __publicField(this, "groups");
+    this.students = studentData.students;
+    this.groups = studentData.groups;
+  }
+  getRandomStudent(n) {
+    const studentsUUID = Object.keys(this.students);
+    const drawer = new UniqueDrawer(studentsUUID);
+    const selectedStudents = drawer.drawWithoutReplacement(n);
+    const selectedStudentsData = selectedStudents.map((uuid) => {
+      return {
+        name: this.students[uuid].name,
+        group: this.students[uuid].group
+      };
+    });
+    return selectedStudentsData;
+  }
+  getRandomGroup(n) {
+    const groupsUUID = Object.keys(this.groups);
+    const drawer = new UniqueDrawer(groupsUUID);
+    const selectedGroups = drawer.drawWithoutReplacement(n);
+    const selectedGroupsData = selectedGroups.map((uuid) => {
+      return {
+        name: this.groups[uuid].name,
+        credit: this.groups[uuid].credit,
+        students: this.groups[uuid].students
+      };
+    });
+    return selectedGroupsData;
+  }
+  getRandomStuInEachGp(n) {
+    const groupsUUID = Object.keys(this.groups);
+    const groupStudentMap = {};
+    groupsUUID.forEach((uuid) => {
+      const drawer = new UniqueDrawer(this.groups[uuid].students);
+      const selectedStudents = drawer.drawWithoutReplacement(n);
+      groupStudentMap[uuid] = selectedStudents.map((studentUUID) => {
+        return this.students[studentUUID].name;
+      });
+    });
+    return groupStudentMap;
+  }
+}
 let OnClass$1 = class OnClass {
   constructor() {
     __publicField(this, "studentData");
     __publicField(this, "studentList");
     __publicField(this, "groupList");
+    __publicField(this, "randomStu");
     this.studentData = DataLoader();
     this.studentList = this.studentData.students;
     this.groupList = this.studentData.groups;
     console.log("groups", this.groupList);
+    this.randomStu = new ClassRandom(this.studentData);
   }
   getStudentList(groupId) {
     if (groupId) {
@@ -254,6 +396,8 @@ let OnClass$1 = class OnClass {
       return null;
     }
     return student.group;
+  }
+  saveGroupData() {
   }
 };
 class QuickClass {
@@ -389,33 +533,29 @@ ipcMain.handle("getStudentsInfo", async () => {
     return null;
   }
 });
-function validatePath(userPath) {
-  const allowedPaths = [
-    path$1.join(app.getPath("appData"), "classhub")
-  ];
-  const isValid = allowedPaths.some((allowed) => {
-    const relative = path$1.relative(allowed, userPath);
-    return !relative.startsWith("..") && !path$1.isAbsolute(relative);
-  });
-  if (!isValid) throw new Error("非法路径访问");
-  return userPath;
-}
-ipcMain.handle("read-image-to-base64", async (_, filePath) => {
-  try {
-    const validPath = validatePath(filePath);
-    const buffer = await fs$1.readFile(validPath);
-    return `data:image/${path$1.extname(filePath).slice(1)};base64,${buffer.toString("base64")}`;
-  } catch (error) {
-    console.error("读取图片失败:", error);
-    return null;
-  }
-});
 ipcMain.handle("launch-tool", async (_, toolId) => {
   try {
     extTool.startTool(toolId);
   } catch (error) {
     console.error("启动工具失败:", error);
     dialog.showErrorBox("启动外部工具失败", "请检查工具配置或路径是否正确。");
+  }
+});
+ipcMain.handle("getToolList", async () => {
+  try {
+    console.log("gotTodoList", extTool.getToolList());
+    return extTool.getToolList();
+  } catch (error) {
+    console.error("获取工具列表失败:", error);
+  }
+});
+ipcMain.handle("getIconBase64", (_, toolId) => {
+  try {
+    const base64 = extTool.getIconData(toolId);
+    return base64;
+  } catch (error) {
+    console.error("获取工具图标失败:", error);
+    return null;
   }
 });
 ipcMain.handle("getNoticeList", async (_) => {

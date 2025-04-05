@@ -41,7 +41,7 @@ function hideWindow() {
 <style scoped>
 body, html{
   border-radius: 16px;
-  background: var(--Background, #F7F7F7);
+  background: #F7F7F7;
 }
 #app {
   position: absolute;
@@ -53,7 +53,7 @@ body, html{
   flex-direction: column;
   align-items: flex-start;
   border-radius: 16px;
-  background: var(--Background, #F7F7F7);
+  background: #F7F7F7;
   overflow: hidden;
 }
 

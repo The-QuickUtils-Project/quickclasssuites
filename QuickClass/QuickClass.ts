@@ -22,5 +22,4 @@ export class QuickClass{
         }
         return content;
     };
-    
 }

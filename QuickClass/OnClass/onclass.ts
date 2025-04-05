@@ -1,15 +1,19 @@
 import { DataLoader } from "./DataEditor/dataEditMethod";
+import RandomStu from './random';
+
 
 export class OnClass{
     studentData: studentData;
     public studentList: students;
     public groupList: groups;
+    public randomStu: RandomStu;
     constructor(){
         // 加载学生/小组信息
         this.studentData = DataLoader()
         this.studentList = this.studentData.students;
         this.groupList = this.studentData.groups;
         console.log('groups', this.groupList);
+        this.randomStu = new RandomStu(this.studentData);
     };
     getStudentList(groupId: string | null) {
         // 返回学生列表
@@ -49,4 +53,7 @@ export class OnClass{
         }
         return student.group;
     };
+    saveGroupData(){
+        
+    }
 }
