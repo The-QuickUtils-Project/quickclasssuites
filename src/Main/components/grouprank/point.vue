@@ -6,12 +6,12 @@
                 <img id="close-button" src="./Close.png" @click="handleClose" />
             </div>
 
-            <div id="current-credit">
-                <p id="current-credit-content">当前积分: {{ currentCredit_ }}</p>
+            <div id="current-point">
+                <p id="current-point-content">当前积分: {{ currentpoint_ }}</p>
             </div>
-            <div id="editCredit">
-                <p id="editCredit-title">加分</p>
-                <div id="editCredit-input">
+            <div id="editpoint">
+                <p id="editpoint-title">加分</p>
+                <div id="editpoint-input">
                     <input type="text" placeholder="请输入积分" />
                     <button id="confirm-button" @click="onConfirm">确认</button>
                 </div>
@@ -29,35 +29,35 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
-    currentCredit: Number,
+    currentpoint: Number,
     groupId: String,
 })
-const currentCredit_ = ref(props.currentCredit)
+const currentpoint_ = ref(props.currentpoint)
 watch(
-    () => props.currentCredit,
+    () => props.currentpoint,
     (newVal: any) => {
-        currentCredit_.value = newVal;
+        currentpoint_.value = newVal;
     }
 );
-console.log('Current credit', props.currentCredit)
-const emit = defineEmits(['closeCreditDialog', 'confirmCredit']);
+console.log('Current point', props.currentpoint)
+const emit = defineEmits(['closepointDialog', 'confirmpoint']);
 function onConfirm() {
-    console.log('Confirm clicked', props.groupId, props.currentCredit);
+    console.log('Confirm clicked', props.groupId, props.currentpoint);
     const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-    const creditValue = parseInt(input.value, 10);
+    const pointValue = parseInt(input.value, 10);
 
-    // 直接使用 props.currentCredit
-    const updatedCredit = (currentCredit_.value) + creditValue;
-    console.log('Updated Credit value:', updatedCredit);
-    currentCredit_.value = updatedCredit
-    emit('confirmCredit', {
+    // 直接使用 props.currentpoint
+    const updatedpoint = (currentpoint_.value) + pointValue;
+    console.log('Updated point value:', updatedpoint);
+    currentpoint_.value = updatedpoint
+    emit('confirmpoint', {
         groupId: props.groupId,
-        credit: updatedCredit, // 将更新后的积分传递给父组件
+        point: updatedpoint, // 将更新后的积分传递给父组件
     });
 }
 
 const handleClose = () => {
-    emit('closeCreditDialog')
+    emit('closepointDialog')
 }
 </script>
 
@@ -107,7 +107,7 @@ const handleClose = () => {
     cursor: pointer;
 }
 
-#current-credit {
+#current-point {
     display: flex;
     padding: 0px 30px;
     align-items: center;
@@ -121,7 +121,7 @@ const handleClose = () => {
     line-height: normal;
 }
 
-#editCredit {
+#editpoint {
     display: flex;
     height: 149px;
     padding: 10px 30px;
@@ -132,7 +132,7 @@ const handleClose = () => {
     align-self: stretch;
 }
 
-#editCredit-title {
+#editpoint-title {
     color: #000;
     font-family: MiSans;
     font-size: 20px;
@@ -141,7 +141,7 @@ const handleClose = () => {
     line-height: normal;
 }
 
-#editCredit-input {
+#editpoint-input {
     display: flex;
     height: 34px;
     padding-right: 3px;
@@ -151,7 +151,7 @@ const handleClose = () => {
     flex-shrink: 0;
 }
 
-#editCredit-input input {
+#editpoint-input input {
     width: 258px;
     height: 34px;
     border-radius: 5px;
@@ -160,7 +160,7 @@ const handleClose = () => {
     outline: none;
 }
 
-#editCredit-input button {
+#editpoint-input button {
     display: flex;
     height: 34px;
     width: 84px;
@@ -177,7 +177,7 @@ const handleClose = () => {
     line-height: normal;
 }
 
-#editCredit-input button:hover {
+#editpoint-input button:hover {
     background: #0052CC;
 }
 </style>

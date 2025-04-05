@@ -332,7 +332,7 @@ class ClassRandom {
     const selectedGroupsData = selectedGroups.map((uuid) => {
       return {
         name: this.groups[uuid].name,
-        credit: this.groups[uuid].credit,
+        point: this.groups[uuid].point,
         students: this.groups[uuid].students
       };
     });
@@ -399,16 +399,27 @@ let OnClass$1 = class OnClass {
   saveGroupData() {
   }
 };
+function sortGroupsBypoint(groups) {
+  const sortedGroups = Object.values(groups).sort((a, b) => b.point - a.point);
+  const result = sortedGroups.reduce((acc, group) => {
+    acc[group.name] = group.point;
+    return acc;
+  }, {});
+  return result;
+}
 class QuickClass {
   constructor() {
     __publicField(this, "configSession");
     __publicField(this, "onClassTool");
     __publicField(this, "Noticeboard");
     __publicField(this, "extTools");
+    __publicField(this, "grouprank");
+    console.log("QuickClass Engine v25.3");
     this.configSession = new Config$2("config.json");
     this.Noticeboard = new Noticeboard();
     this.extTools = new EduTool();
     this.onClassTool = new OnClass$1();
+    this.grouprank = sortGroupsBypoint;
   }
   getConfigItem(key) {
     const content = this.configSession.getConfigItem(key);
@@ -418,11 +429,23 @@ class QuickClass {
     }
     return content;
   }
+  getGroupRank() {
+    const groupList = this.onClassTool.groupList;
+    return sortGroupsBypoint(groupList);
+  }
+  reloadEngine() {
+    console.log("Reloading QCE Classes");
+    this.configSession = new Config$2("config.json");
+    this.Noticeboard = new Noticeboard();
+    this.extTools = new EduTool();
+    this.onClassTool = new OnClass$1();
+    console.log("Reloaded");
+  }
 }
-const quickClass = new QuickClass();
-const extTool = quickClass.extTools;
-const noticeBoard = quickClass.Noticeboard;
-const OnClass2 = quickClass.onClassTool;
+let quickClass = new QuickClass();
+let extTool = quickClass.extTools;
+let noticeBoard = quickClass.Noticeboard;
+let OnClass2 = quickClass.onClassTool;
 const __dirname = path$1.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path$1.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -572,6 +595,9 @@ ipcMain.handle("getRandomGroupMember", async (_, n) => {
     detail: resultText
   });
 });
+ipcMain.handle("getRank", () => {
+  return quickClass.getGroupRank();
+});
 ipcMain.handle("launch-tool", async (_, toolId) => {
   try {
     extTool.startTool(toolId);
@@ -606,6 +632,12 @@ ipcMain.handle("getNoticeList", async (_) => {
     console.error("获取公告列表失败:", error);
     return null;
   }
+});
+ipcMain.handle("hot-reload-engine", async () => {
+  quickClass.reloadEngine();
+  extTool = quickClass.extTools;
+  noticeBoard = quickClass.Noticeboard;
+  OnClass2 = quickClass.onClassTool;
 });
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {

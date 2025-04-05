@@ -1,8 +1,11 @@
 <template>
     <div id="onclassView">
-        <div id="StudentView">
+        <div id="container">
+            <div id="StudentView">
 
+            </div>
         </div>
+
         <Dock>
             <ToolChip toolName="下课" :toolAction="() => {
                 emit('changePage')
@@ -12,12 +15,14 @@
             <ToolChip toolName="随机" :toolAction="() => { showRandomDialog() }">
                 <img src="./dock/assets/random.png" alt="随机点名" />
             </ToolChip>
-            <ToolChip v-if="tools" :key="index" :toolName="info.name" :toolAction="() => startTool(id)" v-for="(info, id, index) in tools as Record<string, ToolInfo>">
+            <ToolChip v-if="tools" :key="index" :toolName="info.name" :toolAction="() => startTool(id)"
+                v-for="(info, id, index) in tools as Record<string, ToolInfo>">
                 <img :src="toolIcons[id]" :alt="info.name" />
             </ToolChip>
         </Dock>
-        <Credit :show="credit_dialog_visible" :current-credit="current_credit" :groupId="current_group" @closeCreditDialog="closeCreditDialog" @confirmCredit="onConfirmCredit">
-        </Credit>
+        <point :show="point_dialog_visible" :currentpoint="current_point" :groupId="current_group"
+            @closepointDialog="closepointDialog" @confirmpoint="onConfirmpoint">
+        </point>
         <Random :show="randomDialogVisible" @closeRandomDialog="closeRandomDialog"></Random>
     </div>
 </template>
@@ -28,7 +33,7 @@ import { ref } from 'vue';
 import Dock from './dock/Dock.vue';
 import ToolChip from './dock/ToolChip/ToolChip.vue';
 // @ts-ignore
-import Credit from './grouprank/Credit.vue';
+import point from './grouprank/point.vue';
 import Random from './randomDialog/random.vue';
 const emit = defineEmits(['changePage']);
 const groups = ref<groups | null>(null);
@@ -38,45 +43,45 @@ window.ipcRenderer.invoke('getStudentsInfo').then((result: students) => {
     console.log('students', students.value);
 });
 
-const credit_dialog_visible = ref(false);
-const current_credit = ref(0);
+const point_dialog_visible = ref(false);
+const current_point = ref(0);
 const current_group = ref('0');
-const showCreditDialog = () => {
-    credit_dialog_visible.value = true;
+const showpointDialog = () => {
+    point_dialog_visible.value = true;
 };
-// showCreditDialog()
+// showpointDialog()
 // @ts-ignore
 function onGroupCardClick(groupId: string) {
     console.log('onGroupCardClick', groupId);
     if (groups.value && groups.value[groupId]) {
         current_group.value = groupId;
-        current_credit.value = groups.value[groupId].credit;
-        showCreditDialog();
+        current_point.value = groups.value[groupId].point;
+        showpointDialog();
     } else {
         console.error('Group not found:', groupId);
     }
 };
 
-function onConfirmCredit(data: { groupId: string; credit: number }) {
-    console.log('onConfirmCredit', data.groupId, data.credit);
+function onConfirmpoint(data: { groupId: string; point: number }) {
+    console.log('onConfirmpoint', data.groupId, data.point);
     if (groups.value && groups.value[data.groupId]) {
-        groups.value[data.groupId].credit = data.credit;
+        groups.value[data.groupId].point = data.point;
         // 这里可以添加更新UI的逻辑
-        console.log('Updated group credit:', groups.value[data.groupId]);
+        console.log('Updated group point:', groups.value[data.groupId]);
     } else {
         console.error('Group not found:', data.groupId);
     }
 }
 
-const closeCreditDialog = () => {
-    credit_dialog_visible.value = false;
+const closepointDialog = () => {
+    point_dialog_visible.value = false;
 };
 
-// const credit_dialog = document.createElement('div');
-// credit_dialog.innerHTML = `
-// <Credit></Credit>
+// const point_dialog = document.createElement('div');
+// point_dialog.innerHTML = `
+// <point></point>
 // `;
-// document.getElementById('onclassView')?.appendChild(credit_dialog);
+// document.getElementById('onclassView')?.appendChild(point_dialog);
 
 window.ipcRenderer.invoke('getGroupsInfo').then((result: groups) => {
     groups.value = result;
@@ -124,18 +129,18 @@ window.ipcRenderer.invoke('getGroupsInfo').then((result: groups) => {
 
 // 加载工具
 interface ToolInfo {
-  name: string;
-  path: string;
-  description: string;
+    name: string;
+    path: string;
+    description: string;
 }
 
 const tools = ref<Record<string, ToolInfo> | null>(null);
 const toolIcons = ref<Record<string, string>>({});
 
 window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>) => {
-  console.log('ToolList', result);
-  tools.value = result;
-  loadToolIcons();
+    console.log('ToolList', result);
+    tools.value = result;
+    loadToolIcons();
 });
 
 
@@ -175,9 +180,21 @@ function closeRandomDialog() {
 #onclassView {
     display: flex;
     height: 692px;
+    padding: 10px 0px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+#container {
+    display: flex;
+    width: 100%;
+    height: 542px;
     flex-direction: column;
     align-items: center;
-    gap: 21px;
+    gap: 10px;
     flex-shrink: 0;
     align-self: stretch;
 }
@@ -185,17 +202,18 @@ function closeRandomDialog() {
 #StudentView {
     display: flex;
     width: 1152px;
-    height: 542px;
-    padding-bottom: 88px;
-    justify-content: center;
+    height: 454px;
+    padding: 0px 10px;
+    flex-direction: column;
     align-items: center;
-    overflow-y: auto;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .group-card {
     display: flex;
     padding: 10px;
-    width: 100%;
+    // width: 1152px;
     height: 222px;
     flex-direction: column;
     align-items: flex-start;

@@ -15,10 +15,12 @@ const components = {
 const currentPage = ref('MainPage');
 
 function changePage() {
-  if(currentPage.value === 'MainPage') {
+  if (currentPage.value === 'MainPage') {
     currentPage.value = 'OnClass';
+    window.ipcRenderer.invoke('hot-reload-engine');
   } else {
     currentPage.value = 'MainPage';
+    window.ipcRenderer.invoke('hot-reload-engine');
   }
 }
 
@@ -32,17 +34,19 @@ function hideWindow() {
   <div id="app">
     <div id="titlebar">
       <img alt="quickclass-icon" id="icon" src="./assets/svgicon.svg" />
-      <img id="close_btn" src="./assets/Images/shared/close.png" alt="close" @click="hideWindow"/>
+      <img id="close_btn" src="./assets/Images/shared/close.png" alt="close" @click="hideWindow" />
     </div>
     <component :is="components[currentPage]" @changePage="changePage"></component>
   </div>
 </template>
 
 <style scoped>
-body, html{
+body,
+html {
   border-radius: 16px;
   background: #F7F7F7;
 }
+
 #app {
   position: absolute;
   left: 0px;

@@ -3,13 +3,12 @@ import { app, Tray, BrowserWindow, Menu, ipcMain, dialog } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path';
 import { QuickClass } from '../QuickClass/QuickClass'
-import { Console } from 'node:console';
 
-const quickClass = new QuickClass();
+let quickClass = new QuickClass();
 
-const extTool = quickClass.extTools;
-const noticeBoard = quickClass.Noticeboard;
-const OnClass = quickClass.onClassTool;
+let extTool = quickClass.extTools;
+let noticeBoard = quickClass.Noticeboard;
+let OnClass = quickClass.onClassTool;
 
 // 开发/生产模式切换
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -203,6 +202,11 @@ ipcMain.handle('getRandomGroupMember', async (_, n) => {
   })
 })
 
+// Rank小组件对接
+ipcMain.handle('getRank', () => {
+  return quickClass.getGroupRank()
+})
+
 // 文件路径白名单校验
 // function validatePath(userPath: string) {
 //   const allowedPaths = [
@@ -269,6 +273,16 @@ ipcMain.handle('getNoticeList', async (_) => {
     console.error('获取公告列表失败:', error)
     return null;
   }
+})
+
+
+//QCE 系统操作
+
+ipcMain.handle('hot-reload-engine', async () => {
+  quickClass.reloadEngine();
+  extTool = quickClass.extTools;
+  noticeBoard = quickClass.Noticeboard;
+  OnClass = quickClass.onClassTool;
 })
 
 // 并没有什么用的macOS兼容性代码

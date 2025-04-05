@@ -20,7 +20,7 @@
 
 #### getGroupsInfo()
 
-获取完整的小组信息(包括credit, members)
+获取完整的小组信息(包括point, members)
 
 #### getStudentsInfo()
 

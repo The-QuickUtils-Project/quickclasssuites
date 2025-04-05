@@ -9,7 +9,7 @@ interface students {
 interface groups {
     [uuid: string]: {
         name: string,
-        credit: number,
+        point: number,
         students: string[]
     }
 }

@@ -1,15 +1,18 @@
 <template>
     <div class="main-page">
-        <noticeboard />
-        <div id="rightArea">
-            <ClassSchedule />
-            <GroupRank />
+        <div id="widgets">
+            <noticeboard />
+            <div id="rightArea">
+                <ClassSchedule />
+                <GroupRank />
+            </div>
         </div>
         <Dock>
             <ToolChip toolName="开始上课" :toolAction="startClass">
-                <img src="./dock/assets/startclass.svg"  alt="上课"/>
+                <img src="./dock/assets/startclass.svg" alt="上课" />
             </ToolChip>
-            <ToolChip v-if="tools" :key="index" :toolName="info.name" :toolAction="() => startTool(id)" v-for="(info, id, index) in tools as Record<string, ToolInfo>">
+            <ToolChip v-if="tools" :key="index" :toolName="info.name" :toolAction="() => startTool(id)"
+                v-for="(info, id, index) in tools as Record<string, ToolInfo>">
                 <img :src="toolIcons[id]" :alt="info.name" />
             </ToolChip>
         </Dock>
@@ -31,18 +34,18 @@ function startClass() {
 }
 
 interface ToolInfo {
-  name: string;
-  path: string;
-  description: string;
+    name: string;
+    path: string;
+    description: string;
 }
 
 const tools = ref<Record<string, ToolInfo> | null>(null);
 const toolIcons = ref<Record<string, string>>({});
 
 window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>) => {
-  console.log('ToolList', result);
-  tools.value = result;
-  loadToolIcons();
+    console.log('ToolList', result);
+    tools.value = result;
+    loadToolIcons();
 });
 
 
@@ -60,18 +63,25 @@ async function loadToolIcons() {
         console.log('tools', toolIcons.value);
     }
 }
+
 </script>
 
 <style scoped>
-.main-page {
-    width: 100%;
+#widgets {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    align-content: flex-start;
-    gap: 20px 10px;
+    align-items: center;
+    gap: 10px;
+}
+
+.main-page {
+    display: flex;
+    height: 692px;
+    padding: 10px 0px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
     align-self: stretch;
-    flex-wrap: wrap;
 }
 
 #rightArea {
