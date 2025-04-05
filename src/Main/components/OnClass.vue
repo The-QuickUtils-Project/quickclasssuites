@@ -9,13 +9,16 @@
             }">
                 <img src="./dock/assets/startclass.png" alt="下课" />
             </ToolChip>
-            <ToolChip toolName="随机" :toolAction="() => { }">
+            <ToolChip toolName="随机" :toolAction="() => { showRandomDialog() }">
                 <img src="./dock/assets/random.png" alt="随机点名" />
             </ToolChip>
-            <ToolChip></ToolChip>
+            <ToolChip v-if="tools" :key="index" :toolName="info.name" :toolAction="() => startTool(id)" v-for="(info, id, index) in tools as Record<string, ToolInfo>">
+                <img :src="toolIcons[id]" :alt="info.name" />
+            </ToolChip>
         </Dock>
         <Credit :show="credit_dialog_visible" :current-credit="current_credit" :groupId="current_group" @closeCreditDialog="closeCreditDialog" @confirmCredit="onConfirmCredit">
         </Credit>
+        <Random :show="randomDialogVisible" @closeRandomDialog="closeRandomDialog"></Random>
     </div>
 </template>
 
@@ -26,6 +29,7 @@ import Dock from './dock/Dock.vue';
 import ToolChip from './dock/ToolChip/ToolChip.vue';
 // @ts-ignore
 import Credit from './grouprank/Credit.vue';
+import Random from './randomDialog/random.vue';
 const emit = defineEmits(['changePage']);
 const groups = ref<groups | null>(null);
 const students = ref<students | null>(null);
@@ -117,6 +121,50 @@ window.ipcRenderer.invoke('getGroupsInfo').then((result: groups) => {
         });
     }
 });
+
+// 加载工具
+interface ToolInfo {
+  name: string;
+  path: string;
+  description: string;
+}
+
+const tools = ref<Record<string, ToolInfo> | null>(null);
+const toolIcons = ref<Record<string, string>>({});
+
+window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>) => {
+  console.log('ToolList', result);
+  tools.value = result;
+  loadToolIcons();
+});
+
+
+function startTool(id: string) {
+    window.ipcRenderer.invoke('launch-tool', id)
+}
+
+
+async function loadToolIcons() {
+    if (!tools.value) return;
+    for (const id of Object.keys(tools.value)) {
+        const base64Icon = await window.ipcRenderer.invoke('getIconBase64', id);
+        toolIcons.value[id] = base64Icon;
+        console.log('gotIcon', id, base64Icon);
+        console.log('tools', toolIcons.value);
+    }
+}
+
+
+// 随机抽取
+const randomDialogVisible = ref(false)
+
+function showRandomDialog() {
+    randomDialogVisible.value = true
+}
+
+function closeRandomDialog() {
+    randomDialogVisible.value = false
+}
 
 </script>
 

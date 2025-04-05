@@ -14,7 +14,6 @@ export default class ClassRandom{
         const selectedStudentsData = selectedStudents.map(uuid => {
             return {
                 name: this.students[uuid].name,
-                group: this.students[uuid].group
             }
         });
         return selectedStudentsData;

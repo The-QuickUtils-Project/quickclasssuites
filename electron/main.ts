@@ -156,6 +156,53 @@ ipcMain.handle('getStudentsInfo', async () => {
   }
 })
 
+//Random 组件对接
+const randomUtil = OnClass.randomStu
+ipcMain.handle('getRandomStudent', async (_, n) => {
+  const result = randomUtil.getRandomStudent(n)
+  let resultText = '';
+  result.forEach((student) => {
+    resultText = resultText + ' ' + student.name;
+  })
+  // @ts-ignore
+  dialog.showMessageBox(win, {
+    title: "点名结果",
+    type: 'info',
+    message: '抽取结果:',
+    detail: resultText
+  })
+})
+
+ipcMain.handle('getRandomGroup', async (_, n) => {
+  const result = randomUtil.getRandomGroup(n)
+  let resultText = '';
+  result.forEach((student) => {
+    resultText = resultText + ' ' + student.name;
+  })
+  // @ts-ignore
+  dialog.showMessageBox(win, {
+    title: "点名结果",
+    type: 'info',
+    message: '抽取结果:',
+    detail: resultText
+  })
+})
+
+ipcMain.handle('getRandomGroupMember', async (_, n) => {
+  const result = randomUtil.getRandomStuInEachGp(n)
+  let resultText = '';
+  Object.keys(result).forEach((student) => {
+    resultText = resultText + ' ' + result[student];
+  })
+  // @ts-ignore
+  dialog.showMessageBox(win, {
+    title: "点名结果",
+    type: 'info',
+    message: '抽取结果:',
+    detail: resultText
+  })
+})
+
 // 文件路径白名单校验
 // function validatePath(userPath: string) {
 //   const allowedPaths = [

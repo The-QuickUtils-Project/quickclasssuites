@@ -320,8 +320,7 @@ class ClassRandom {
     const selectedStudents = drawer.drawWithoutReplacement(n);
     const selectedStudentsData = selectedStudents.map((uuid) => {
       return {
-        name: this.students[uuid].name,
-        group: this.students[uuid].group
+        name: this.students[uuid].name
       };
     });
     return selectedStudentsData;
@@ -532,6 +531,46 @@ ipcMain.handle("getStudentsInfo", async () => {
     console.error("获取学生信息失败:", error);
     return null;
   }
+});
+const randomUtil = OnClass2.randomStu;
+ipcMain.handle("getRandomStudent", async (_, n) => {
+  const result = randomUtil.getRandomStudent(n);
+  let resultText = "";
+  result.forEach((student) => {
+    resultText = resultText + " " + student.name;
+  });
+  dialog.showMessageBox(win, {
+    title: "点名结果",
+    type: "info",
+    message: "抽取结果:",
+    detail: resultText
+  });
+});
+ipcMain.handle("getRandomGroup", async (_, n) => {
+  const result = randomUtil.getRandomGroup(n);
+  let resultText = "";
+  result.forEach((student) => {
+    resultText = resultText + " " + student.name;
+  });
+  dialog.showMessageBox(win, {
+    title: "点名结果",
+    type: "info",
+    message: "抽取结果:",
+    detail: resultText
+  });
+});
+ipcMain.handle("getRandomGroupMember", async (_, n) => {
+  const result = randomUtil.getRandomStuInEachGp(n);
+  let resultText = "";
+  Object.keys(result).forEach((student) => {
+    resultText = resultText + " " + result[student];
+  });
+  dialog.showMessageBox(win, {
+    title: "点名结果",
+    type: "info",
+    message: "抽取结果:",
+    detail: resultText
+  });
 });
 ipcMain.handle("launch-tool", async (_, toolId) => {
   try {
