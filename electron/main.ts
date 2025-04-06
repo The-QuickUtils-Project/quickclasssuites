@@ -13,6 +13,7 @@ let OnClass = quickClass.onClassTool;
 // 开发/生产模式切换
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 process.env.APP_ROOT = path.join(__dirname, '..')
+console.log('Path:', app.getAppPath)
 
 
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -205,6 +206,12 @@ ipcMain.handle('getRandomGroupMember', async (_, n) => {
 // Rank小组件对接
 ipcMain.handle('getRank', () => {
   return quickClass.getGroupRank()
+})
+
+ipcMain.handle('updateGroupStorage', async (_, groups)=>{
+  console.log('[main.ts]Saving updated group data.');
+  groups = JSON.parse(groups);
+  OnClass.saveGroupStorage(groups);
 })
 
 // 文件路径白名单校验

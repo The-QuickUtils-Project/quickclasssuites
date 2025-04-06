@@ -1,6 +1,6 @@
 // QuickClass Hub Noticeboard Core
 
-import { Config } from "../../Config/configLoader";
+import { Config } from "../../OnClass/DataEditor/configLoader";
 
 export default class Noticeboard{
     notices: notices;

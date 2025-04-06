@@ -1,10 +1,20 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { app } from 'electron';
+import { Config as engineConfig } from '../../Config/configLoader';
 
 function validatePath(userPath: string) {
+  const config = new engineConfig('config.json')
+  const configStoragePath = config.getConfigItem("archievePath");
+  let archievePath = "";
+  if (configStoragePath === "" || configStoragePath === undefined) {
+    archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), 'archieve');
+    console.warn('Using default archieve path, when the software updates, the archieve might lost.')
+  } else {
+    archievePath = configStoragePath;
+  }
   const allowedPaths = [
-    path.join(app.getPath('appData'), 'classhub')
+    path.join(archievePath)
   ]
 
   const isValid = allowedPaths.some(allowed => {

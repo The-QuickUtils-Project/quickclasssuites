@@ -13,6 +13,7 @@ export class QuickClass{
     constructor(){
         console.log("QuickClass Engine v25.3")
         this.configSession = new Config('config.json');
+        this.configSession.getConfigItem("archievePath");
         this.Noticeboard = new Noticeboard();
         this.extTools = new EduTool();
         this.onClassTool = new OnClass();
@@ -37,5 +38,5 @@ export class QuickClass{
         this.extTools = new EduTool();
         this.onClassTool = new OnClass();
         console.log('Reloaded')
-    }
+    };
 }

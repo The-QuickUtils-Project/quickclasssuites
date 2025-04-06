@@ -10,3 +10,11 @@ export function DataLoader(): studentData {
     return classData;
 }
 
+export function DataSaver(data: any, key: string) {
+    const configSession = new Config('classinfo.json', {
+        students: {},
+        groups: {}
+    });
+    configSession.setConfigItem(key, data);
+    console.log("Save data successfully")
+}

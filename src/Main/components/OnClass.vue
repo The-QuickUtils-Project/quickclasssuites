@@ -66,9 +66,11 @@ function onConfirmpoint(data: { groupId: string; point: number }) {
     console.log('onConfirmpoint', data.groupId, data.point);
     if (groups.value && groups.value[data.groupId]) {
         groups.value[data.groupId].point = data.point;
-        // 这里可以添加更新UI的逻辑
+        console.log('groupValue', groups.value)
+        const groupsData = groups.value;
+        window.ipcRenderer.invoke('updateGroupStorage', JSON.stringify(groupsData));
         console.log('Updated group point:', groups.value[data.groupId]);
-    } else {
+    }else{
         console.error('Group not found:', data.groupId);
     }
 }
@@ -110,11 +112,15 @@ window.ipcRenderer.invoke('getGroupsInfo').then((result: groups) => {
             // 添加成员信息
             const studentList: string[] = groups.value[groupId].students;
             studentList.forEach((studentId) => {
+                let avatarurl = students.value[studentId].avatar;
+                if(avatarurl === "" || !avatarurl){
+                    avatarurl = "https://img.icons8.com/fluency/96/student-male.png"
+                }
                 const studentCard = document.createElement('div');
                 studentCard.className = 'group-card-member';
                 studentCard.innerHTML = `
                 <div class="group-card-member-avatar-container">
-                    <img src="${students.value[studentId].avatar}" style="" class="group-card-member-avatar" alt="${students.value[studentId].name}" />
+                    <img src="${avatarurl}" style="" class="group-card-member-avatar" alt="${students.value[studentId].name}" />
                 </div>
                 <p class="group-card-member-name">${students.value[studentId].name}</p>
                 `;
@@ -278,7 +284,7 @@ function closeRandomDialog() {
     height: 80px;
     flex-shrink: 0;
     aspect-ratio: 1/1;
-    background: lightgray 50% / cover no-repeat;
+    background: #F7F7F7 50% / cover no-repeat;
     border-radius: 1000px;
 }
 </style>

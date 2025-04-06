@@ -1,4 +1,4 @@
-import { DataLoader } from "./DataEditor/dataEditMethod";
+import { DataLoader, DataSaver } from "./DataEditor/dataEditMethod";
 import RandomStu from './random';
 
 
@@ -53,7 +53,7 @@ export class OnClass{
         }
         return student.group;
     };
-    saveGroupData(){
-        
+    saveGroupStorage(groups: groups) {
+        DataSaver(groups, 'groups')
     }
 }

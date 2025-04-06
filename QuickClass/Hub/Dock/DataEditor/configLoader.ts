@@ -1,14 +1,22 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
-const appName = 'classhub';
+import { Config as engineConfig } from '../../../Config/configLoader';
+import { app } from "electron";
 
 export class Config {
     private configPath: string;
-
+    private config: engineConfig;
     constructor(fileName: string) {
-        const appDataPath = process.env.APPDATA || '';
-        this.configPath = path.join(appDataPath, appName, 'QuickClassResources', 'Tool' ,fileName);
+        this.config = new engineConfig('config.json')
+        const configStoragePath = this.config.getConfigItem("archievePath");
+        let archievePath = "";
+        if (configStoragePath === "" || configStoragePath === undefined) {
+            archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), 'archieve');
+            console.warn('Using default archieve path, when the software updates, the archieve might lost.')
+        } else {
+            archievePath = configStoragePath;
+        }
+        this.configPath = path.join(archievePath, 'QuickClass', 'Tools', fileName);
 
         const configDir = path.dirname(this.configPath);
         if (!fs.existsSync(configDir)) {

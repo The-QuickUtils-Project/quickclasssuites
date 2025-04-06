@@ -57,7 +57,7 @@ export class Config {
     // 保存配置
     private saveConfig(config: Record<string, any>): void {
         try {
-            fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), 'utf-8');
+            fs.writeFileSync(this.configPath, JSON.stringify(config, null, 4), 'utf-8');
         } catch (error) {
             console.error('保存配置失败:', error);
         }

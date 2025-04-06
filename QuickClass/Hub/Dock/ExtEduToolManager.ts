@@ -2,6 +2,8 @@ import { DataLoader, ToolsData } from "./DataEditor/dataEditMethod";
 import { execFile } from 'child_process';
 import { read_image_to_base64 } from "./imgconvert";
 import path from 'node:path';
+import { Config as engineConfig } from '../../Config/configLoader';
+import { app } from "electron";
 
 export class EduTool {
     tools: ToolsData = {};
@@ -55,9 +57,16 @@ export class EduTool {
             console.error('Tool not found:', id);
             return null;
         }
-
-        const appDataPath = process.env.APPDATA || '';
-        const iconPath = path.join(appDataPath, 'classhub', 'QuickClassResources', 'Tool', 'Icons', id + '.png');
+        const config = new engineConfig('config.json')
+        const configStoragePath = config.getConfigItem("archievePath");
+        let archievePath = "";
+        if (configStoragePath === "" || configStoragePath === undefined) {
+            archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), 'archieve');
+            console.warn('Using default archieve path, when the software updates, the archieve might lost.')
+        } else {
+            archievePath = configStoragePath;
+        }
+        const iconPath = path.join(archievePath, 'QuickClass', 'Tools', 'Icons', id + '.png');
 
         try {
             const base64 = await read_image_to_base64(iconPath);

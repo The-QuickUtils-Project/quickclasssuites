@@ -44,16 +44,18 @@ const emit = defineEmits(['closepointDialog', 'confirmpoint']);
 function onConfirm() {
     console.log('Confirm clicked', props.groupId, props.currentpoint);
     const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-    const pointValue = parseInt(input.value, 10);
-
-    // 直接使用 props.currentpoint
-    const updatedpoint = (currentpoint_.value) + pointValue;
-    console.log('Updated point value:', updatedpoint);
-    currentpoint_.value = updatedpoint
-    emit('confirmpoint', {
-        groupId: props.groupId,
-        point: updatedpoint, // 将更新后的积分传递给父组件
-    });
+    if(input.value != ''){
+        const pointValue = parseInt(input.value, 10);
+        // 直接使用 props.currentpoint
+        const updatedpoint = (currentpoint_.value) + pointValue;
+        console.log('Updated point value:', updatedpoint);
+        currentpoint_.value = updatedpoint
+        emit('confirmpoint', {
+            groupId: props.groupId,
+            point: updatedpoint, // 将更新后的积分传递给父组件
+        });
+    }
+    
 }
 
 const handleClose = () => {

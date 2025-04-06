@@ -8,12 +8,12 @@ import * as fs from "fs";
 import * as path from "path";
 import { execFile } from "child_process";
 import fs$1 from "node:fs/promises";
-const appName$2 = "classhub";
+const appName = "classhub";
 let Config$2 = class Config {
   constructor(fileName) {
     __publicField(this, "configPath");
     const appDataPath = process.env.APPDATA || "";
-    this.configPath = path.join(appDataPath, appName$2, "storage", fileName);
+    this.configPath = path.join(appDataPath, appName, "storage", fileName);
     const configDir = path.dirname(this.configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
@@ -52,6 +52,59 @@ let Config$2 = class Config {
   // 保存配置
   saveConfig(config) {
     try {
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 4), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
+    }
+  }
+};
+let Config$1 = class Config2 {
+  constructor(fileName, initContent = {}) {
+    __publicField(this, "configPath");
+    __publicField(this, "config");
+    this.config = new Config$2("config.json");
+    const configStoragePath = this.config.getConfigItem("archievePath");
+    let archievePath = "";
+    if (configStoragePath === "" || configStoragePath === void 0) {
+      archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), "archieve");
+      console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+    } else {
+      archievePath = configStoragePath;
+    }
+    this.configPath = path.join(archievePath, "QuickClass", "Archieve", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify(initContent));
+    }
+  }
+  loadConfig() {
+    try {
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取存档失败:", error);
+      return {};
+    }
+  }
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
+  }
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
+  }
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
+  }
+  saveConfig(config) {
+    try {
       fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
     } catch (error) {
       console.error("保存配置失败:", error);
@@ -62,7 +115,7 @@ class Noticeboard {
   constructor() {
     __publicField(this, "notices");
     console.log("Noticeboard initialized");
-    const config = new Config$2("noticeboard.json");
+    const config = new Config$1("noticeboard.json");
     const notices = config.loadConfig();
     console.log("Loaded notices", notices);
     this.notices = notices;
@@ -82,12 +135,20 @@ class Noticeboard {
     return notice;
   }
 }
-const appName$1 = "classhub";
-let Config$1 = class Config2 {
+class Config3 {
   constructor(fileName) {
     __publicField(this, "configPath");
-    const appDataPath = process.env.APPDATA || "";
-    this.configPath = path.join(appDataPath, appName$1, "QuickClassResources", "Tool", fileName);
+    __publicField(this, "config");
+    this.config = new Config$2("config.json");
+    const configStoragePath = this.config.getConfigItem("archievePath");
+    let archievePath = "";
+    if (configStoragePath === "" || configStoragePath === void 0) {
+      archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), "archieve");
+      console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+    } else {
+      archievePath = configStoragePath;
+    }
+    this.configPath = path.join(archievePath, "QuickClass", "Tools", fileName);
     const configDir = path.dirname(this.configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
@@ -126,15 +187,24 @@ let Config$1 = class Config2 {
       console.error("保存配置失败:", error);
     }
   }
-};
+}
 function DataLoader$1() {
-  const config = new Config$1("extTools.json");
+  const config = new Config3("extTools.json");
   const toolsData = config.loadConfig();
   return toolsData;
 }
 function validatePath(userPath) {
+  const config = new Config$2("config.json");
+  const configStoragePath = config.getConfigItem("archievePath");
+  let archievePath = "";
+  if (configStoragePath === "" || configStoragePath === void 0) {
+    archievePath = path$1.join(app.isPackaged ? path$1.dirname(process.execPath) : app.getAppPath(), "archieve");
+    console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+  } else {
+    archievePath = configStoragePath;
+  }
   const allowedPaths = [
-    path$1.join(app.getPath("appData"), "classhub")
+    path$1.join(archievePath)
   ];
   const isValid = allowedPaths.some((allowed) => {
     const relative = path$1.relative(allowed, userPath);
@@ -205,8 +275,16 @@ class EduTool {
       console.error("Tool not found:", id);
       return null;
     }
-    const appDataPath = process.env.APPDATA || "";
-    const iconPath = path$1.join(appDataPath, "classhub", "QuickClassResources", "Tool", "Icons", id + ".png");
+    const config = new Config$2("config.json");
+    const configStoragePath = config.getConfigItem("archievePath");
+    let archievePath = "";
+    if (configStoragePath === "" || configStoragePath === void 0) {
+      archievePath = path$1.join(app.isPackaged ? path$1.dirname(process.execPath) : app.getAppPath(), "archieve");
+      console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+    } else {
+      archievePath = configStoragePath;
+    }
+    const iconPath = path$1.join(archievePath, "QuickClass", "Tools", "Icons", id + ".png");
     try {
       const base64 = await read_image_to_base64(iconPath);
       if (base64) {
@@ -231,58 +309,21 @@ class EduTool {
     }
   }
 }
-const appName = "classhub";
-class Config3 {
-  constructor(fileName, initContent = {}) {
-    __publicField(this, "configPath");
-    const appDataPath = process.env.APPDATA || "";
-    this.configPath = path.join(appDataPath, appName, "QuickClassResources", "Archieve", fileName);
-    const configDir = path.dirname(this.configPath);
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
-    }
-    if (!fs.existsSync(this.configPath)) {
-      fs.writeFileSync(this.configPath, JSON.stringify(initContent));
-    }
-  }
-  loadConfig() {
-    try {
-      const data = fs.readFileSync(this.configPath, "utf-8");
-      return JSON.parse(data);
-    } catch (error) {
-      console.error("读取存档失败:", error);
-      return {};
-    }
-  }
-  getConfigItem(key) {
-    const config = this.loadConfig();
-    return config[key];
-  }
-  setConfigItem(key, value) {
-    const config = this.loadConfig();
-    config[key] = value;
-    this.saveConfig(config);
-  }
-  deleteConfigItem(key) {
-    const config = this.loadConfig();
-    delete config[key];
-    this.saveConfig(config);
-  }
-  saveConfig(config) {
-    try {
-      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
-    } catch (error) {
-      console.error("保存配置失败:", error);
-    }
-  }
-}
 function DataLoader() {
-  const data = new Config3("classinfo.json", {
+  const data = new Config$1("classinfo.json", {
     students: {},
     groups: {}
   });
   const classData = data.loadConfig();
   return classData;
+}
+function DataSaver(data, key) {
+  const configSession = new Config$1("classinfo.json", {
+    students: {},
+    groups: {}
+  });
+  configSession.setConfigItem(key, data);
+  console.log("Save data successfully");
 }
 class UniqueDrawer {
   constructor(students) {
@@ -396,7 +437,8 @@ let OnClass$1 = class OnClass {
     }
     return student.group;
   }
-  saveGroupData() {
+  saveGroupStorage(groups) {
+    DataSaver(groups, "groups");
   }
 };
 function sortGroupsBypoint(groups) {
@@ -416,6 +458,7 @@ class QuickClass {
     __publicField(this, "grouprank");
     console.log("QuickClass Engine v25.3");
     this.configSession = new Config$2("config.json");
+    this.configSession.getConfigItem("archievePath");
     this.Noticeboard = new Noticeboard();
     this.extTools = new EduTool();
     this.onClassTool = new OnClass$1();
@@ -448,6 +491,7 @@ let noticeBoard = quickClass.Noticeboard;
 let OnClass2 = quickClass.onClassTool;
 const __dirname = path$1.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path$1.join(__dirname, "..");
+console.log("Path:", app.getAppPath);
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const MAIN_DIST = path$1.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path$1.join(process.env.APP_ROOT, "dist");
@@ -597,6 +641,11 @@ ipcMain.handle("getRandomGroupMember", async (_, n) => {
 });
 ipcMain.handle("getRank", () => {
   return quickClass.getGroupRank();
+});
+ipcMain.handle("updateGroupStorage", async (_, groups) => {
+  console.log("[main.ts]Saving updated group data.");
+  groups = JSON.parse(groups);
+  OnClass2.saveGroupStorage(groups);
 });
 ipcMain.handle("launch-tool", async (_, toolId) => {
   try {
