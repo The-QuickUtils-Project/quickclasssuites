@@ -65,7 +65,7 @@ function onGroupCardClick(groupId: string) {
 function onConfirmpoint(data: { groupId: string; point: number }) {
     console.log('onConfirmpoint', data.groupId, data.point);
     if (groups.value && groups.value[data.groupId]) {
-        groups.value[data.groupId].point = data.point;
+        groups.value[data.groupId].point = Number(data.point);
         console.log('groupValue', groups.value)
         const groupsData = groups.value;
         window.ipcRenderer.invoke('updateGroupStorage', JSON.stringify(groupsData));
@@ -203,6 +203,7 @@ function closeRandomDialog() {
     gap: 10px;
     flex-shrink: 0;
     align-self: stretch;
+    overflow-y: scroll;
 }
 
 #StudentView {

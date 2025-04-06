@@ -1,0 +1,1 @@
+pyinstaller -F .\qucadel.py -i ..\public\favicon-128.ico

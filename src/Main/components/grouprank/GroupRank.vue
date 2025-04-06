@@ -41,6 +41,10 @@ p {
     margin: 0px;
 }
 
+::-webkit-scrollbar {
+    width: 0px;
+}
+
 #ranklist {
     display: flex;
     width: 100%;
@@ -50,6 +54,7 @@ p {
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+    overflow-y: scroll;
 }
 
 .rankChip {
