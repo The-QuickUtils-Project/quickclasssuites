@@ -35,7 +35,8 @@ export class QuickClass{
         console.log('Reloading QCE Classes')
         this.configSession = new Config('config.json');
         this.Noticeboard = new Noticeboard();
-        this.extTools = new EduTool();
+        // 取消重新加载extTools
+        // this.extTools = new EduTool();
         this.onClassTool = new OnClass();
         console.log('Reloaded')
     };
