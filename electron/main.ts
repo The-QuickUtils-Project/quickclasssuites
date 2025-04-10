@@ -8,6 +8,7 @@ import fs from 'node:fs';
 
 let quickClass = new QuickClass();
 
+
 let extTool = quickClass.extTools;
 let noticeBoard = quickClass.Noticeboard;
 let OnClass = quickClass.onClassTool;
