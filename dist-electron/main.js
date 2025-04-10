@@ -1,590 +1,782 @@
-var U = Object.defineProperty;
-var G = (n, e, t) => e in n ? U(n, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : n[e] = t;
-var a = (n, e, t) => G(n, typeof e != "symbol" ? e + "" : e, t);
-import { app as g, ipcMain as u, dialog as v, BrowserWindow as I, protocol as O, Tray as F, Menu as A } from "electron";
-import { fileURLToPath as M } from "node:url";
-import r from "node:path";
-import * as l from "fs";
-import * as m from "path";
-import { execFile as B } from "child_process";
-import V from "node:fs/promises";
-import j from "node:fs";
-const $ = "classhub";
-let S = class {
-  constructor(e) {
-    a(this, "configPath");
-    const t = process.env.APPDATA || "";
-    this.configPath = m.join(t, $, "storage", e);
-    const o = m.dirname(this.configPath);
-    l.existsSync(o) || l.mkdirSync(o, { recursive: !0 }), l.existsSync(this.configPath) || l.writeFileSync(this.configPath, JSON.stringify({}));
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+import { app, ipcMain, dialog, BrowserWindow, Tray, Menu } from "electron";
+import { fileURLToPath } from "node:url";
+import path$1 from "node:path";
+import * as fs from "fs";
+import * as path from "path";
+import { execFile } from "child_process";
+import fs$1 from "node:fs/promises";
+const appName = "classhub";
+let Config$2 = class Config {
+  constructor(fileName) {
+    __publicField(this, "configPath");
+    const appDataPath = process.env.APPDATA || "";
+    this.configPath = path.join(appDataPath, appName, "storage", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify({}));
+    }
   }
   // 读取配置
   loadConfig() {
     try {
-      const e = l.readFileSync(this.configPath, "utf-8");
-      return JSON.parse(e);
-    } catch (e) {
-      return console.error("读取配置失败:", e), {};
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取配置失败:", error);
+      return {};
     }
   }
   // 获取配置项
-  getConfigItem(e) {
-    return this.loadConfig()[e];
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
   }
   // 设置配置项
-  setConfigItem(e, t) {
-    const o = this.loadConfig();
-    o[e] = t, this.saveConfig(o);
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
   }
   // 删除配置项
-  deleteConfigItem(e) {
-    const t = this.loadConfig();
-    delete t[e], this.saveConfig(t);
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
   }
   // 保存配置
-  saveConfig(e) {
+  saveConfig(config) {
     try {
-      l.writeFileSync(this.configPath, JSON.stringify(e, null, 4), "utf-8");
-    } catch (t) {
-      console.error("保存配置失败:", t);
-    }
-  }
-}, R = class {
-  constructor(e, t = {}) {
-    a(this, "configPath");
-    a(this, "config");
-    this.config = new S("config.json");
-    const o = this.config.getConfigItem("archievePath");
-    let s = "";
-    o === "" || o === void 0 ? (s = m.join(g.isPackaged ? m.dirname(process.execPath) : g.getAppPath(), "archieve"), console.warn("Using default archieve path, when the software updates, the archieve might lost.")) : s = o, this.configPath = m.join(s, "QuickClass", "Archieve", e);
-    const c = m.dirname(this.configPath);
-    l.existsSync(c) || l.mkdirSync(c, { recursive: !0 }), l.existsSync(this.configPath) || l.writeFileSync(this.configPath, JSON.stringify(t));
-  }
-  loadConfig() {
-    try {
-      const e = l.readFileSync(this.configPath, "utf-8");
-      return JSON.parse(e);
-    } catch (e) {
-      return console.error("读取存档失败:", e), {};
-    }
-  }
-  getConfigItem(e) {
-    return this.loadConfig()[e];
-  }
-  setConfigItem(e, t) {
-    const o = this.loadConfig();
-    o[e] = t, this.saveConfig(o);
-  }
-  deleteConfigItem(e) {
-    const t = this.loadConfig();
-    delete t[e], this.saveConfig(t);
-  }
-  saveConfig(e) {
-    try {
-      l.writeFileSync(this.configPath, JSON.stringify(e, null, 2), "utf-8");
-    } catch (t) {
-      console.error("保存配置失败:", t);
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 4), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
     }
   }
 };
-class x {
-  constructor() {
-    a(this, "notices");
-    console.log("Noticeboard initialized");
-    const t = new R("noticeboard.json").loadConfig();
-    console.log("Loaded notices", t), this.notices = t;
-  }
-  getNoticeList() {
-    return Object.keys(this.notices).map((t) => this.notices[t].title);
-  }
-  getNoticebyId(e) {
-    const t = this.notices[e];
-    return t || (console.log("Notice not found"), null);
-  }
-}
-class J {
-  constructor(e) {
-    a(this, "configPath");
-    a(this, "config");
-    this.config = new S("config.json");
-    const t = this.config.getConfigItem("archievePath");
-    let o = "";
-    t === "" || t === void 0 ? (o = m.join(g.isPackaged ? m.dirname(process.execPath) : g.getAppPath(), "archieve"), console.warn("Using default archieve path, when the software updates, the archieve might lost.")) : o = t, this.configPath = m.join(o, "QuickClass", "Tools", e);
-    const s = m.dirname(this.configPath);
-    l.existsSync(s) || l.mkdirSync(s, { recursive: !0 }), l.existsSync(this.configPath) || l.writeFileSync(this.configPath, JSON.stringify({}));
+let Config$1 = class Config2 {
+  constructor(fileName, initContent = {}) {
+    __publicField(this, "configPath");
+    __publicField(this, "config");
+    this.config = new Config$2("config.json");
+    const configStoragePath = this.config.getConfigItem("archievePath");
+    let archievePath = "";
+    if (configStoragePath === "" || configStoragePath === void 0) {
+      archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), "archieve");
+      console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+    } else {
+      archievePath = configStoragePath;
+    }
+    this.configPath = path.join(archievePath, "QuickClass", "Archieve", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify(initContent));
+    }
   }
   loadConfig() {
     try {
-      const e = l.readFileSync(this.configPath, "utf-8");
-      return JSON.parse(e);
-    } catch (e) {
-      return console.error("读取Tools配置失败:", e), {};
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取存档失败:", error);
+      return {};
     }
   }
-  getConfigItem(e) {
-    return this.loadConfig()[e];
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
   }
-  setConfigItem(e, t) {
-    const o = this.loadConfig();
-    o[e] = t, this.saveConfig(o);
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
   }
-  deleteConfigItem(e) {
-    const t = this.loadConfig();
-    delete t[e], this.saveConfig(t);
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
   }
-  saveConfig(e) {
+  saveConfig(config) {
     try {
-      l.writeFileSync(this.configPath, JSON.stringify(e, null, 2), "utf-8");
-    } catch (t) {
-      console.error("保存配置失败:", t);
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
+    }
+  }
+};
+class Noticeboard {
+  constructor() {
+    __publicField(this, "notices");
+    console.log("Noticeboard initialized");
+    const config = new Config$1("noticeboard.json");
+    const notices = config.loadConfig();
+    console.log("Loaded notices", notices);
+    this.notices = notices;
+  }
+  getNoticeList() {
+    const noticeList = Object.keys(this.notices).map((key) => {
+      return this.notices[key].title;
+    });
+    return noticeList;
+  }
+  getNoticebyId(id) {
+    const notice = this.notices[id];
+    if (!notice) {
+      console.log("Notice not found");
+      return null;
+    }
+    return notice;
+  }
+}
+class Config3 {
+  constructor(fileName) {
+    __publicField(this, "configPath");
+    __publicField(this, "config");
+    this.config = new Config$2("config.json");
+    const configStoragePath = this.config.getConfigItem("archievePath");
+    let archievePath = "";
+    if (configStoragePath === "" || configStoragePath === void 0) {
+      archievePath = path.join(app.isPackaged ? path.dirname(process.execPath) : app.getAppPath(), "archieve");
+      console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+    } else {
+      archievePath = configStoragePath;
+    }
+    this.configPath = path.join(archievePath, "QuickClass", "Tools", fileName);
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.configPath)) {
+      fs.writeFileSync(this.configPath, JSON.stringify({}));
+    }
+  }
+  loadConfig() {
+    try {
+      const data = fs.readFileSync(this.configPath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("读取Tools配置失败:", error);
+      return {};
+    }
+  }
+  getConfigItem(key) {
+    const config = this.loadConfig();
+    return config[key];
+  }
+  setConfigItem(key, value) {
+    const config = this.loadConfig();
+    config[key] = value;
+    this.saveConfig(config);
+  }
+  deleteConfigItem(key) {
+    const config = this.loadConfig();
+    delete config[key];
+    this.saveConfig(config);
+  }
+  saveConfig(config) {
+    try {
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), "utf-8");
+    } catch (error) {
+      console.error("保存配置失败:", error);
     }
   }
 }
-function Q() {
-  return new J("extTools.json").loadConfig();
+function DataLoader$1() {
+  const config = new Config3("extTools.json");
+  const toolsData = config.loadConfig();
+  return toolsData;
 }
-function W(n) {
-  const t = new S("config.json").getConfigItem("archievePath");
-  let o = "";
-  if (t === "" || t === void 0 ? (o = r.join(g.isPackaged ? r.dirname(process.execPath) : g.getAppPath(), "archieve"), console.warn("Using default archieve path, when the software updates, the archieve might lost.")) : o = t, ![
-    r.join(o)
-  ].some((h) => {
-    const f = r.relative(h, n);
-    return !f.startsWith("..") && !r.isAbsolute(f);
-  })) throw new Error("非法路径访问");
-  return n;
+function validatePath(userPath) {
+  const config = new Config$2("config.json");
+  const configStoragePath = config.getConfigItem("archievePath");
+  let archievePath = "";
+  if (configStoragePath === "" || configStoragePath === void 0) {
+    archievePath = path$1.join(app.isPackaged ? path$1.dirname(process.execPath) : app.getAppPath(), "archieve");
+    console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+  } else {
+    archievePath = configStoragePath;
+  }
+  const allowedPaths = [
+    path$1.join(archievePath)
+  ];
+  const isValid = allowedPaths.some((allowed) => {
+    const relative = path$1.relative(allowed, userPath);
+    return !relative.startsWith("..") && !path$1.isAbsolute(relative);
+  });
+  if (!isValid) throw new Error("非法路径访问");
+  return userPath;
 }
-async function q(n) {
+async function read_image_to_base64(filePath) {
   try {
-    const e = W(n), o = `data:image/png;base64,${(await V.readFile(e)).toString("base64")}`;
-    return console.log("ReadImgSuccessful:", o), o;
-  } catch (e) {
-    return console.error("读取图片失败:", e), null;
+    const validPath = validatePath(filePath);
+    const buffer = await fs$1.readFile(validPath);
+    const data = `data:image/png;base64,${buffer.toString("base64")}`;
+    console.log("ReadImgSuccessful:", data);
+    return data;
+  } catch (error) {
+    console.error("读取图片失败:", error);
+    return null;
   }
 }
-class z {
+class EduTool {
   constructor() {
-    a(this, "tools", {});
-    a(this, "toolIconCache", {});
-    const e = Q();
-    this.tools = e, Object.keys(this.tools).forEach(async (t) => {
-      const o = await this.getBase64Icon(t);
-      o && (this.toolIconCache[t] = o);
+    __publicField(this, "tools", {});
+    __publicField(this, "toolIconCache", {});
+    const toolsData = DataLoader$1();
+    this.tools = toolsData;
+    Object.keys(this.tools).forEach(async (id) => {
+      const base64 = await this.getBase64Icon(id);
+      if (base64) {
+        this.toolIconCache[id] = base64;
+      }
     });
   }
-  startTool(e) {
-    console.log("Launching tool with ID:", e);
-    const t = this.tools[e];
-    if (!t) {
-      console.error("Tool not found:", e);
+  startTool(id) {
+    console.log("Launching tool with ID:", id);
+    const tool = this.tools[id];
+    if (!tool) {
+      console.error("Tool not found:", id);
       return;
     }
-    console.log(`Tool info:
-Tool ID:` + e + `
-Tool Name:` + t.name + `
-Tool Path:` + t.path + `
-Tool Description:` + t.description), B(t.path, (o, s, c) => {
-      if (o) {
-        console.error(`Error launching tool: ${o.message}`);
+    console.log("Tool info:\nTool ID:" + id + "\nTool Name:" + tool.name + "\nTool Path:" + tool.path + "\nTool Description:" + tool.description);
+    execFile(tool.path, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error launching tool: ${error.message}`);
         return;
       }
-      if (c) {
-        console.error(`Tool stderr: ${c}`);
+      if (stderr) {
+        console.error(`Tool stderr: ${stderr}`);
         return;
       }
-      console.log(`Tool stdout: ${s}`);
+      console.log(`Tool stdout: ${stdout}`);
     });
   }
   getToolList() {
     return this.tools;
   }
-  getToolInfo(e) {
-    const t = this.tools[e];
-    return t || (console.error("Tool not found:", e), null);
+  getToolInfo(id) {
+    const tool = this.tools[id];
+    if (!tool) {
+      console.error("Tool not found:", id);
+      return null;
+    }
+    return tool;
   }
-  async getBase64Icon(e) {
-    if (!this.tools[e])
-      return console.error("Tool not found:", e), null;
-    const s = new S("config.json").getConfigItem("archievePath");
-    let c = "";
-    s === "" || s === void 0 ? (c = r.join(g.isPackaged ? r.dirname(process.execPath) : g.getAppPath(), "archieve"), console.warn("Using default archieve path, when the software updates, the archieve might lost.")) : c = s;
-    const h = r.join(c, "QuickClass", "Tools", "Icons", e + ".png");
+  async getBase64Icon(id) {
+    const tool = this.tools[id];
+    if (!tool) {
+      console.error("Tool not found:", id);
+      return null;
+    }
+    const config = new Config$2("config.json");
+    const configStoragePath = config.getConfigItem("archievePath");
+    let archievePath = "";
+    if (configStoragePath === "" || configStoragePath === void 0) {
+      archievePath = path$1.join(app.isPackaged ? path$1.dirname(process.execPath) : app.getAppPath(), "archieve");
+      console.warn("Using default archieve path, when the software updates, the archieve might lost.");
+    } else {
+      archievePath = configStoragePath;
+    }
+    const iconPath = path$1.join(archievePath, "QuickClass", "Tools", "Icons", id + ".png");
     try {
-      const f = await q(h);
-      return f ? (console.log("[ExtToolHost] ReadImgSuccessful:", f), this.toolIconCache[e] = f, f) : (console.error("Failed to convert image to base64:", h), null);
-    } catch (f) {
-      return console.error("Error reading image:", f), null;
+      const base64 = await read_image_to_base64(iconPath);
+      if (base64) {
+        console.log("[ExtToolHost] ReadImgSuccessful:", base64);
+        this.toolIconCache[id] = base64;
+        return base64;
+      } else {
+        console.error("Failed to convert image to base64:", iconPath);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error reading image:", error);
+      return null;
     }
   }
-  getIconData(e) {
-    return this.toolIconCache[e] ? this.toolIconCache[e] : (console.error("Icon not found in cache:", e), null);
+  getIconData(id) {
+    if (this.toolIconCache[id]) {
+      return this.toolIconCache[id];
+    } else {
+      console.error("Icon not found in cache:", id);
+      return null;
+    }
   }
 }
-function H() {
-  return new R("classinfo.json", {
+function DataLoader() {
+  const data = new Config$1("classinfo.json", {
     students: {},
     groups: {}
-  }).loadConfig();
+  });
+  const classData = data.loadConfig();
+  return classData;
 }
-function K(n, e) {
-  new R("classinfo.json", {
+function DataSaver(data, key) {
+  const configSession = new Config$1("classinfo.json", {
     students: {},
     groups: {}
-  }).setConfigItem(e, n), console.log("Save data successfully");
+  });
+  configSession.setConfigItem(key, data);
+  console.log("Save data successfully");
 }
-class L {
-  constructor(e) {
-    a(this, "pool");
-    a(this, "original");
-    this.pool = [...e], this.original = [...e];
+class UniqueDrawer {
+  constructor(students) {
+    __publicField(this, "pool");
+    __publicField(this, "original");
+    this.pool = [...students];
+    this.original = [...students];
   }
   // 单次无放回抽取
-  drawWithoutReplacement(e) {
-    if (e > this.pool.length) throw new Error("Not enough candidates");
-    const t = [];
-    for (let o = this.pool.length - 1; o >= this.pool.length - e; o--) {
-      const s = Math.floor(Math.random() * (o + 1));
-      [this.pool[o], this.pool[s]] = [this.pool[s], this.pool[o]], t.push(this.pool[o]);
+  drawWithoutReplacement(n) {
+    if (n > this.pool.length) throw new Error("Not enough candidates");
+    const result = [];
+    for (let i = this.pool.length - 1; i >= this.pool.length - n; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.pool[i], this.pool[j]] = [this.pool[j], this.pool[i]];
+      result.push(this.pool[i]);
     }
-    return t;
+    return result;
   }
   // 重置池
   reset() {
     this.pool = [...this.original];
   }
 }
-class X {
-  constructor(e) {
-    a(this, "students");
-    a(this, "groups");
-    this.students = e.students, this.groups = e.groups;
+class ClassRandom {
+  constructor(studentData) {
+    __publicField(this, "students");
+    __publicField(this, "groups");
+    this.students = studentData.students;
+    this.groups = studentData.groups;
   }
-  getRandomStudent(e) {
-    const t = Object.keys(this.students);
-    return new L(t).drawWithoutReplacement(e).map((h) => ({
-      name: this.students[h].name
-    }));
+  getRandomStudent(n) {
+    const studentsUUID = Object.keys(this.students);
+    const drawer = new UniqueDrawer(studentsUUID);
+    const selectedStudents = drawer.drawWithoutReplacement(n);
+    const selectedStudentsData = selectedStudents.map((uuid) => {
+      return {
+        name: this.students[uuid].name
+      };
+    });
+    return selectedStudentsData;
   }
-  getRandomGroup(e) {
-    const t = Object.keys(this.groups);
-    return new L(t).drawWithoutReplacement(e).map((h) => ({
-      name: this.groups[h].name,
-      point: this.groups[h].point,
-      students: this.groups[h].students
-    }));
+  getRandomGroup(n) {
+    const groupsUUID = Object.keys(this.groups);
+    const drawer = new UniqueDrawer(groupsUUID);
+    const selectedGroups = drawer.drawWithoutReplacement(n);
+    const selectedGroupsData = selectedGroups.map((uuid) => {
+      return {
+        name: this.groups[uuid].name,
+        point: this.groups[uuid].point,
+        students: this.groups[uuid].students
+      };
+    });
+    return selectedGroupsData;
   }
-  getRandomStuInEachGp(e) {
-    const t = Object.keys(this.groups), o = {};
-    return t.forEach((s) => {
-      const h = new L(this.groups[s].students).drawWithoutReplacement(e);
-      o[s] = h.map((f) => this.students[f].name);
-    }), o;
+  getRandomStuInEachGp(n) {
+    const groupsUUID = Object.keys(this.groups);
+    const groupStudentMap = {};
+    groupsUUID.forEach((uuid) => {
+      const drawer = new UniqueDrawer(this.groups[uuid].students);
+      const selectedStudents = drawer.drawWithoutReplacement(n);
+      groupStudentMap[uuid] = selectedStudents.map((studentUUID) => {
+        return this.students[studentUUID].name;
+      });
+    });
+    return groupStudentMap;
   }
 }
-let E = class {
+let OnClass$1 = class OnClass {
   constructor() {
-    a(this, "studentData");
-    a(this, "studentList");
-    a(this, "groupList");
-    a(this, "randomStu");
-    this.studentData = H(), this.studentList = this.studentData.students, this.groupList = this.studentData.groups, console.log("groups", this.groupList), this.randomStu = new X(this.studentData);
+    __publicField(this, "studentData");
+    __publicField(this, "studentList");
+    __publicField(this, "groupList");
+    __publicField(this, "randomStu");
+    this.studentData = DataLoader();
+    this.studentList = this.studentData.students;
+    this.groupList = this.studentData.groups;
+    console.log("groups", this.groupList);
+    this.randomStu = new ClassRandom(this.studentData);
   }
-  getStudentList(e) {
-    return e ? this.groupList[e].students : Object.keys(this.studentList);
+  getStudentList(groupId) {
+    if (groupId) {
+      return this.groupList[groupId].students;
+    }
+    return Object.keys(this.studentList);
   }
   getGroupList() {
     return this.groupList;
   }
-  getStudentInfo(e) {
-    const t = this.studentList[e];
-    return t || (console.log("Student not found"), null);
+  getStudentInfo(studentId) {
+    const student = this.studentList[studentId];
+    if (!student) {
+      console.log("Student not found");
+      return null;
+    }
+    return student;
   }
-  getGroupInfo(e) {
-    const t = this.groupList[e];
-    return t || (console.log("Group not found"), null);
+  getGroupInfo(groupId) {
+    const group = this.groupList[groupId];
+    if (!group) {
+      console.log("Group not found");
+      return null;
+    }
+    return group;
   }
-  getStudentGroup(e) {
-    const t = this.studentList[e];
-    return t ? t.group : (console.log("Student not found"), null);
+  getStudentGroup(studentId) {
+    const student = this.studentList[studentId];
+    if (!student) {
+      console.log("Student not found");
+      return null;
+    }
+    return student.group;
   }
-  saveGroupStorage(e) {
-    K(e, "groups");
+  saveGroupStorage(groups) {
+    DataSaver(groups, "groups");
   }
 };
-function k(n) {
-  return Object.values(n).sort((o, s) => s.point - o.point).reduce((o, s) => (o[s.name] = s.point, o), {});
+function sortGroupsBypoint(groups) {
+  const sortedGroups = Object.values(groups).sort((a, b) => b.point - a.point);
+  const result = sortedGroups.reduce((acc, group) => {
+    acc[group.name] = group.point;
+    return acc;
+  }, {});
+  return result;
 }
-class Y {
+class QuickClass {
   constructor() {
-    a(this, "configSession");
-    a(this, "onClassTool");
-    a(this, "Noticeboard");
-    a(this, "extTools");
-    a(this, "grouprank");
-    console.log("QuickClass Engine v25.3"), this.configSession = new S("config.json"), this.configSession.getConfigItem("archievePath"), this.Noticeboard = new x(), this.extTools = new z(), this.onClassTool = new E(), this.grouprank = k;
+    __publicField(this, "configSession");
+    __publicField(this, "onClassTool");
+    __publicField(this, "Noticeboard");
+    __publicField(this, "extTools");
+    __publicField(this, "grouprank");
+    console.log("QuickClass Engine v25.3");
+    this.configSession = new Config$2("config.json");
+    this.configSession.getConfigItem("archievePath");
+    this.Noticeboard = new Noticeboard();
+    this.extTools = new EduTool();
+    this.onClassTool = new OnClass$1();
+    this.grouprank = sortGroupsBypoint;
   }
-  getConfigItem(e) {
-    const t = this.configSession.getConfigItem(e);
-    return t || (console.log("Config item not found"), null);
+  getConfigItem(key) {
+    const content = this.configSession.getConfigItem(key);
+    if (!content) {
+      console.log("Config item not found");
+      return null;
+    }
+    return content;
   }
   getGroupRank() {
-    const e = this.onClassTool.groupList;
-    return k(e);
+    const groupList = this.onClassTool.groupList;
+    return sortGroupsBypoint(groupList);
   }
   reloadEngine() {
-    console.log("Reloading QCE Classes"), this.configSession = new S("config.json"), this.Noticeboard = new x(), this.onClassTool = new E(), console.log("Reloaded");
+    console.log("Reloading QCE Classes");
+    this.configSession = new Config$2("config.json");
+    this.Noticeboard = new Noticeboard();
+    this.onClassTool = new OnClass$1();
+    console.log("Reloaded");
   }
 }
-let w = new Y(), y = w.extTools, N = w.Noticeboard, P = w.onClassTool;
-const T = r.dirname(M(import.meta.url));
-process.env.APP_ROOT = r.join(T, "..");
-console.log("Path:", g.getAppPath);
-const C = process.env.VITE_DEV_SERVER_URL, fe = r.join(process.env.APP_ROOT, "dist-electron"), b = r.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = C ? r.join(process.env.APP_ROOT, "public") : b;
-let i;
-function _() {
-  i = new I({
-    icon: r.join(process.env.VITE_PUBLIC, "favicon-64.ico"),
+let quickClass = new QuickClass();
+let extTool = quickClass.extTools;
+let noticeBoard = quickClass.Noticeboard;
+let OnClass2 = quickClass.onClassTool;
+const __dirname = path$1.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path$1.join(__dirname, "..");
+console.log("Path:", app.getAppPath);
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path$1.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path$1.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path$1.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path$1.join(process.env.VITE_PUBLIC, "favicon-64.ico"),
     width: 1440,
     height: 1024,
-    frame: !1,
-    resizable: !1,
+    frame: false,
+    resizable: false,
     webPreferences: {
-      preload: r.join(T, "preload.mjs"),
-      nodeIntegration: !1
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: false
     },
-    transparent: !0
-  }), i.webContents.on("did-finish-load", () => {
-    i == null || i.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), C ? i.loadURL(C) : i.loadFile(r.join(b, "index.html")), i.on("close", (n) => {
-    g.isQuiting || (n.preventDefault(), i && i.hide());
+    transparent: true
+    // alwaysOnTop: true
+  });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
+  }
+  win.on("close", (event) => {
+    if (!app.isQuiting) {
+      event.preventDefault();
+      if (win) {
+        win.hide();
+      }
+    }
   });
 }
-let d;
-function Z() {
-  d = new I({
+let settingsWindow;
+function createSettingsWindow() {
+  settingsWindow = new BrowserWindow({
     width: 495,
     height: 692,
     // parent: win || undefined,
-    frame: !1,
-    resizable: !1,
+    frame: false,
+    resizable: false,
     webPreferences: {
-      preload: r.join(T, "preload.mjs"),
-      nodeIntegration: !0,
-      contextIsolation: !0
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
     }
-  }), C ? d.loadURL(C + "/settings") : d.loadFile(r.join(b, "settings.html"));
+  });
+  if (VITE_DEV_SERVER_URL) {
+    settingsWindow.loadURL(VITE_DEV_SERVER_URL + "/settings");
+  } else {
+    settingsWindow.loadFile(path$1.join(RENDERER_DIST, "settings.html"));
+  }
 }
-let p;
-function ee() {
-  p = new I({
+let noticemanWindow;
+function createNoticeWindow() {
+  noticemanWindow = new BrowserWindow({
     width: 919,
     height: 662,
     // parent: win || undefined,
-    frame: !1,
-    resizable: !1,
+    frame: false,
+    resizable: false,
     webPreferences: {
-      preload: r.join(T, "preload.mjs"),
-      nodeIntegration: !0,
-      contextIsolation: !0
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
     }
-  }), C ? p.loadURL(C + "/noticeman") : p.loadFile(r.join(b, "noticeman.html"));
+  });
+  if (VITE_DEV_SERVER_URL) {
+    noticemanWindow.loadURL(VITE_DEV_SERVER_URL + "/noticeman");
+  } else {
+    noticemanWindow.loadFile(path$1.join(RENDERER_DIST, "noticeman.html"));
+  }
 }
-u.handle("open-notice-window", async () => {
-  p ? p.focus() : ee();
-});
-u.on("close-noticeman-window", () => {
-  p && (p.close(), p = null);
-});
-u.handle("getGroupsInfo", async () => {
-  try {
-    const n = P.getGroupList();
-    return console.log("获取分组信息成功:", n), n;
-  } catch (n) {
-    return console.error("获取班级信息失败:", n), null;
+ipcMain.handle("open-notice-window", async () => {
+  if (noticemanWindow) {
+    noticemanWindow.focus();
+  } else {
+    createNoticeWindow();
   }
 });
-u.handle("getStudentsInfo", async () => {
-  try {
-    const n = P.studentList;
-    return console.log("获取学生信息成功:", n), n;
-  } catch (n) {
-    return console.error("获取学生信息失败:", n), null;
+ipcMain.on("close-noticeman-window", () => {
+  if (noticemanWindow) {
+    noticemanWindow.close();
+    noticemanWindow = null;
   }
 });
-const D = P.randomStu;
-u.handle("getRandomStudent", async (n, e) => {
-  const t = D.getRandomStudent(e);
-  let o = "";
-  t.forEach((s) => {
-    o = o + " " + s.name;
-  }), v.showMessageBox(i, {
+ipcMain.handle("getGroupsInfo", async () => {
+  try {
+    const groupsInfo = OnClass2.getGroupList();
+    console.log("获取分组信息成功:", groupsInfo);
+    return groupsInfo;
+  } catch (error) {
+    console.error("获取班级信息失败:", error);
+    return null;
+  }
+});
+ipcMain.handle("getStudentsInfo", async () => {
+  try {
+    const studentsInfo = OnClass2.studentList;
+    console.log("获取学生信息成功:", studentsInfo);
+    return studentsInfo;
+  } catch (error) {
+    console.error("获取学生信息失败:", error);
+    return null;
+  }
+});
+const randomUtil = OnClass2.randomStu;
+ipcMain.handle("getRandomStudent", async (_, n) => {
+  const result = randomUtil.getRandomStudent(n);
+  let resultText = "";
+  result.forEach((student) => {
+    resultText = resultText + " " + student.name;
+  });
+  dialog.showMessageBox(win, {
     title: "点名结果",
     type: "info",
     message: "抽取结果:",
-    detail: o
+    detail: resultText
   });
 });
-u.handle("getRandomGroup", async (n, e) => {
-  const t = D.getRandomGroup(e);
-  let o = "";
-  t.forEach((s) => {
-    o = o + " " + s.name;
-  }), v.showMessageBox(i, {
+ipcMain.handle("getRandomGroup", async (_, n) => {
+  const result = randomUtil.getRandomGroup(n);
+  let resultText = "";
+  result.forEach((student) => {
+    resultText = resultText + " " + student.name;
+  });
+  dialog.showMessageBox(win, {
     title: "点名结果",
     type: "info",
     message: "抽取结果:",
-    detail: o
+    detail: resultText
   });
 });
-u.handle("getRandomGroupMember", async (n, e) => {
-  const t = D.getRandomStuInEachGp(e);
-  let o = "";
-  Object.keys(t).forEach((s) => {
-    o = o + " " + t[s];
-  }), v.showMessageBox(i, {
+ipcMain.handle("getRandomGroupMember", async (_, n) => {
+  const result = randomUtil.getRandomStuInEachGp(n);
+  let resultText = "";
+  Object.keys(result).forEach((student) => {
+    resultText = resultText + " " + result[student];
+  });
+  dialog.showMessageBox(win, {
     title: "点名结果",
     type: "info",
     message: "抽取结果:",
-    detail: o
+    detail: resultText
   });
 });
-u.handle("getRank", () => w.getGroupRank());
-u.handle("updateGroupStorage", async (n, e) => {
-  console.log("[main.ts]Saving updated group data."), e = JSON.parse(e), P.saveGroupStorage(e);
+ipcMain.handle("getRank", () => {
+  return quickClass.getGroupRank();
 });
-u.handle("launch-tool", async (n, e) => {
+ipcMain.handle("updateGroupStorage", async (_, groups) => {
+  console.log("[main.ts]Saving updated group data.");
+  groups = JSON.parse(groups);
+  OnClass2.saveGroupStorage(groups);
+});
+ipcMain.handle("launch-tool", async (_, toolId) => {
   try {
-    y.startTool(e);
-  } catch (t) {
-    console.error("启动工具失败:", t), v.showErrorBox("启动外部工具失败", "请检查工具配置或路径是否正确。");
+    extTool.startTool(toolId);
+  } catch (error) {
+    console.error("启动工具失败:", error);
+    dialog.showErrorBox("启动外部工具失败", "请检查工具配置或路径是否正确。");
   }
 });
-u.handle("getToolList", async () => {
+ipcMain.handle("getToolList", async () => {
   try {
-    return console.log("gotTodoList", y.getToolList()), y.getToolList();
-  } catch (n) {
-    console.error("获取工具列表失败:", n);
+    console.log("gotTodoList", extTool.getToolList());
+    return extTool.getToolList();
+  } catch (error) {
+    console.error("获取工具列表失败:", error);
   }
 });
-u.handle("getIconBase64", (n, e) => {
+ipcMain.handle("getIconBase64", (_, toolId) => {
   try {
-    return y.getIconData(e);
-  } catch (t) {
-    return console.error("获取工具图标失败:", t), null;
+    const base64 = extTool.getIconData(toolId);
+    return base64;
+  } catch (error) {
+    console.error("获取工具图标失败:", error);
+    return null;
   }
 });
-u.handle("getNoticeList", async (n) => {
+ipcMain.handle("getNoticeList", async (_) => {
   try {
-    const e = N.notices;
-    return console.log("获取公告列表成功:", e), e;
-  } catch (e) {
-    return console.error("获取公告列表失败:", e), null;
+    const noticeList = noticeBoard.notices;
+    console.log("获取公告列表成功:", noticeList);
+    return noticeList;
+  } catch (error) {
+    console.error("获取公告列表失败:", error);
+    return null;
   }
 });
-u.handle("hot-reload-engine", async () => {
-  w.reloadEngine(), y = w.extTools, N = w.Noticeboard, P = w.onClassTool;
+ipcMain.handle("hot-reload-engine", async () => {
+  quickClass.reloadEngine();
+  extTool = quickClass.extTools;
+  noticeBoard = quickClass.Noticeboard;
+  OnClass2 = quickClass.onClassTool;
 });
-g.on("activate", () => {
-  I.getAllWindows().length === 0 && _();
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
-function te() {
-  const n = r.join(process.env.VITE_PUBLIC, "favicon-64.ico"), e = new F(n);
-  e.setToolTip("QuickClass Hub");
-  const t = A.buildFromTemplate([
+function createTray() {
+  const trayIconPath = path$1.join(process.env.VITE_PUBLIC, "favicon-64.ico");
+  const tray = new Tray(trayIconPath);
+  tray.setToolTip("QuickClass Hub");
+  const contextMenu = Menu.buildFromTemplate([
     {
       label: "启动数据编辑器"
     },
     {
       label: "DevTools",
       click: () => {
-        i && (i.webContents.openDevTools(), d == null || d.webContents.openDevTools(), p == null || p.webContents.openDevTools());
+        if (win) {
+          win.webContents.openDevTools();
+          settingsWindow == null ? void 0 : settingsWindow.webContents.openDevTools();
+          noticemanWindow == null ? void 0 : noticemanWindow.webContents.openDevTools();
+        }
       }
     },
     {
       label: "设置",
       click: () => {
-        d ? d.focus() : Z();
+        if (settingsWindow) {
+          settingsWindow.focus();
+        } else {
+          createSettingsWindow();
+        }
       }
     },
     {
       label: "退出",
       click: () => {
-        g.isQuiting = !0, g.quit();
+        app.isQuiting = true;
+        app.quit();
       }
     }
   ]);
-  e.setContextMenu(t), e.on("click", () => {
-    i && (i.isVisible() ? i.hide() : i.show());
+  tray.setContextMenu(contextMenu);
+  tray.on("click", () => {
+    if (win) {
+      win.isVisible() ? win.hide() : win.show();
+    }
   });
 }
-function oe(n) {
-  const e = r.extname(n).toLowerCase();
-  return {
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".gif": "image/gif",
-    ".webp": "image/webp",
-    ".svg": "image/svg+xml"
-  }[e] || "application/octet-stream";
-}
-O.registerSchemesAsPrivileged([
-  {
-    scheme: "qcres",
-    privileges: {
-      secure: !0,
-      // 确保协议是安全的
-      supportFetchAPI: !0
-    }
-  }
-]);
-g.whenReady().then(() => {
+app.whenReady().then(() => {
   try {
-    if (!g.requestSingleInstanceLock()) {
-      g.quit();
+    const gotTheLock = app.requestSingleInstanceLock();
+    if (!gotTheLock) {
+      app.quit();
       return;
     }
-    te(), _(), console.log(w.configSession.getConfigItem("archievePath")), O.handle("qcres", (e) => {
-      const t = new URL(e.url);
-      let o = r.normalize(t.pathname);
-      if (console.log("gotUrl", t), o.startsWith("..") || o.includes("/.."))
-        return new Response(null, { status: 403 });
-      const s = w.configSession.getConfigItem("archievePath"), c = r.join(s, o);
-      try {
-        if (!j.existsSync(c) || !j.statSync(c).isFile())
-          return new Response(null, { status: 404 });
-      } catch {
-        return new Response(null, { status: 500 });
+    createTray();
+    createWindow();
+    console.log(quickClass.configSession.getConfigItem("archievePath"));
+    app.on("second-instance", (event, commandLine, workingDirectory) => {
+      if (win) {
+        if (win.isMinimized()) win.restore();
+        win.isVisible() ? win.hide() : win.show();
+        win.focus();
       }
-      const h = j.readFileSync(c);
-      return new Response(h, {
-        headers: {
-          "Content-Type": oe(c)
-          // 根据扩展名设置 MIME
-        }
-      });
-    }), g.on("second-instance", (e, t, o) => {
-      i && (i.isMinimized() && i.restore(), i.isVisible() ? i.hide() : i.show(), i.focus());
     });
-  } catch (n) {
-    console.error("Error during app initialization:", n);
+  } catch (error) {
+    console.error("Error during app initialization:", error);
   }
 });
-process.on("unhandledRejection", (n) => {
-  console.error("Unhandled Promise Rejection:", n);
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Promise Rejection:", reason);
 });
-process.on("uncaughtException", (n) => {
-  console.error("Uncaught Exception:", n);
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
 });
-u.on("hide-main-window", () => {
-  i && i.hide();
+ipcMain.on("hide-main-window", () => {
+  if (win) {
+    win.hide();
+  }
 });
-u.on("close-settings-window", () => {
-  d && (d.close(), d = null);
+ipcMain.on("close-settings-window", () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
 });
 export {
-  fe as MAIN_DIST,
-  b as RENDERER_DIST,
-  C as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };

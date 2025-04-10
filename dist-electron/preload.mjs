@@ -1,1 +1,31 @@
-"use strict";const n=require("electron");n.contextBridge.exposeInMainWorld("ipcRenderer",{on(...e){const[r,o]=e;return n.ipcRenderer.on(r,(i,...c)=>o(i,...c))},off(...e){const[r,...o]=e;return n.ipcRenderer.off(r,...o)},send(...e){const[r,...o]=e;return n.ipcRenderer.send(r,...o)},invoke(...e){const[r,...o]=e;return n.ipcRenderer.invoke(r,...o)}});n.contextBridge.exposeInMainWorld("electronApp",{hideMainWindow(){n.ipcRenderer.send("hide-main-window")}});n.contextBridge.exposeInMainWorld("resource",{getBase64Image:e=>n.ipcRenderer.invoke("read-image-to-base64",e),launchTool:e=>n.ipcRenderer.invoke("launch-tool",e)});
+"use strict";
+const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("ipcRenderer", {
+  on(...args) {
+    const [channel, listener] = args;
+    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
+  },
+  off(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.off(channel, ...omit);
+  },
+  send(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.send(channel, ...omit);
+  },
+  invoke(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.invoke(channel, ...omit);
+  }
+  // You can expose other APTs you need here.
+  // ...
+});
+electron.contextBridge.exposeInMainWorld("electronApp", {
+  hideMainWindow() {
+    electron.ipcRenderer.send("hide-main-window");
+  }
+});
+electron.contextBridge.exposeInMainWorld("resource", {
+  getBase64Image: (path) => electron.ipcRenderer.invoke("read-image-to-base64", path),
+  launchTool: (id) => electron.ipcRenderer.invoke("launch-tool", id)
+});

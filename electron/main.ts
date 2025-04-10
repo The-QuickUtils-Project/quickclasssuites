@@ -1,9 +1,8 @@
-import { app, Tray, BrowserWindow, Menu, ipcMain, dialog, protocol } from 'electron'
+import { app, Tray, BrowserWindow, Menu, ipcMain, dialog } from 'electron'
 // import { dialog } from 'electron';
 import { fileURLToPath } from 'node:url'
 import path from 'node:path';
 import { QuickClass } from '../QuickClass/QuickClass';
-import fs from 'node:fs';
 
 
 let quickClass = new QuickClass();
@@ -41,7 +40,7 @@ function createWindow() {
       nodeIntegration: false
     },
     transparent: true,
-    alwaysOnTop: true
+    // alwaysOnTop: true
   })
 
   // Test active push message to Renderer-process.
@@ -353,29 +352,29 @@ function createTray() {
   });
 }
 
-function getMimeType(filePath: string) {
-  const ext: string = path.extname(filePath).toLowerCase();
-  const mimeTypes = {
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.webp': 'image/webp',
-    '.svg': 'image/svg+xml',
-  };
-  // @ts-ignore
-  return mimeTypes[ext] || 'application/octet-stream';
-}
+// function getMimeType(filePath: string) {
+//   const ext: string = path.extname(filePath).toLowerCase();
+//   const mimeTypes = {
+//     '.png': 'image/png',
+//     '.jpg': 'image/jpeg',
+//     '.jpeg': 'image/jpeg',
+//     '.gif': 'image/gif',
+//     '.webp': 'image/webp',
+//     '.svg': 'image/svg+xml',
+//   };
+//   // @ts-ignore
+//   return mimeTypes[ext] || 'application/octet-stream';
+// }
 
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'qcres',
-    privileges: {
-      secure: true, // 确保协议是安全的
-      supportFetchAPI: true
-    },
-  },
-]);
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: 'qcres',
+//     privileges: {
+//       secure: true, // 确保协议是安全的
+//       supportFetchAPI: true
+//     },
+//   },
+// ]);
 // Init app
 app.whenReady().then(() => {
   try {
@@ -387,35 +386,35 @@ app.whenReady().then(() => {
     createTray();
     createWindow();
     console.log(quickClass.configSession.getConfigItem('archievePath'))
-    protocol.handle('qcres', (request) => {
-      // 1. 获取请求路径（移除协议和域名）
-      const url = new URL(request.url)
-      let requestedPath = path.normalize(url.pathname) // 标准化路径
-      console.log('gotUrl', url)
-      // 2. 安全检测：防止路径遍历攻击（如 ../../../etc/passwd）
-      if (requestedPath.startsWith('..') || requestedPath.includes('/..')) {
-        return new Response(null, { status: 403 }) // 禁止访问
-      }
+    // protocol.handle('qcres', (request) => {
+    //   // 1. 获取请求路径（移除协议和域名）
+    //   const url = new URL(request.url)
+    //   let requestedPath = path.normalize(url.pathname) // 标准化路径
+    //   console.log('gotUrl', url)
+    //   // 2. 安全检测：防止路径遍历攻击（如 ../../../etc/passwd）
+    //   if (requestedPath.startsWith('..') || requestedPath.includes('/..')) {
+    //     return new Response(null, { status: 403 }) // 禁止访问
+    //   }
     
-      const allowedRoot = quickClass.configSession.getConfigItem('archievePath') // 允许访问的根目录
-      const fullPath = path.join(allowedRoot, requestedPath)
+    //   const allowedRoot = quickClass.configSession.getConfigItem('archievePath') // 允许访问的根目录
+    //   const fullPath = path.join(allowedRoot, requestedPath)
     
-      // 4. 检查文件是否存在且可读
-      try {
-        if (!fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) {
-          return new Response(null, { status: 404 })
-        }
-      } catch (error) {
-        return new Response(null, { status: 500 })
-      }
+    //   // 4. 检查文件是否存在且可读
+    //   try {
+    //     if (!fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) {
+    //       return new Response(null, { status: 404 })
+    //     }
+    //   } catch (error) {
+    //     return new Response(null, { status: 500 })
+    //   }
     
-      const data = fs.readFileSync(fullPath);
-      return new Response(data, {
-        headers: {
-          'Content-Type': getMimeType(fullPath), // 根据扩展名设置 MIME
-        },
-      });
-    })
+    //   const data = fs.readFileSync(fullPath);
+    //   return new Response(data, {
+    //     headers: {
+    //       'Content-Type': getMimeType(fullPath), // 根据扩展名设置 MIME
+    //     },
+    //   });
+    // })
     // @ts-ignore
     app.on('second-instance', (event, commandLine, workingDirectory) => {
       // 如果应用已经有窗口打开，聚焦到已打开的窗口

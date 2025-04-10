@@ -11,6 +11,11 @@
             <ToolChip toolName="开始上课" :toolAction="startClass">
                 <img src="./dock/assets/startclass.svg" alt="上课" />
             </ToolChip>
+            <div style="width: 6px;height: 100px;flex-shrink: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="6" height="96" viewBox="0 0 6 96" fill="none">
+                    <path d="M3 12L3 83" stroke="white" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </div>
             <ToolChip v-if="tools" :key="index" :toolName="info.name" :toolAction="() => startTool(id)"
                 v-for="(info, id, index) in tools as Record<string, ToolInfo>">
                 <img :src="toolIcons[id]" :alt="info.name" />
@@ -89,5 +94,11 @@ async function loadToolIcons() {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+}
+
+#divider {
+    width: 6px;
+    height: 100px;
+    flex-shrink: 0;
 }
 </style>
