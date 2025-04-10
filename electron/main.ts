@@ -37,6 +37,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false
     },
+    transparent: true
   })
 
   // Test active push message to Renderer-process.
@@ -355,8 +356,21 @@ function createTray() {
 // Init app
 app.whenReady().then(() => {
   try {
+    const gotTheLock = app.requestSingleInstanceLock();
+    if (!gotTheLock) {
+      app.quit(); // 如果有其他实例正在运行，则退出
+      return;
+    }
     createTray();
     createWindow();
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+      // 如果应用已经有窗口打开，聚焦到已打开的窗口
+      if (win) {
+        if (win.isMinimized()) win.restore();
+        win.isVisible() ? win.hide() : win.show();
+        win.focus();
+      }
+    });
   } catch (error) {
     console.error('Error during app initialization:', error);
   }

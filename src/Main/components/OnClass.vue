@@ -227,11 +227,11 @@ function closeRandomDialog() {
     gap: 10px;
     align-self: stretch;
     border-radius: 16px;
-    background: #FFF;
+    background: rgba(0, 0, 0, 0.80);
 }
 
 .group-card-name {
-    color: #000;
+    color: #FFF;
     text-align: center;
     font-family: MiSans;
     font-size: 24px;
@@ -262,7 +262,7 @@ function closeRandomDialog() {
 }
 
 .group-card-member-name {
-    color: #000;
+    color: #FFF;
     text-align: center;
     font-family: MiSans;
     font-size: 24px;
@@ -285,7 +285,7 @@ function closeRandomDialog() {
     height: 80px;
     flex-shrink: 0;
     aspect-ratio: 1/1;
-    background: #F7F7F7 50% / cover no-repeat;
+    background: rgba(0, 0, 0, 0.80) 50% / cover no-repeat;
     border-radius: 1000px;
 }
 </style>

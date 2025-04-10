@@ -4,7 +4,8 @@
     </div>
 </template>
 
-<style lang="less">
+<style lang="less" scoped>
+@import url(../widgets_global.less);
 #ClassSchedule {
     display: flex;
     height: 245px;
@@ -16,11 +17,11 @@
     gap: 8px;
     align-self: stretch;
     border-radius: 16px;
-    background: #FFF;
+    background: var(--background);
 }
 #title {
     width: 501.6px;
-    color: #000;
+    color: var(--Text);
     font-family: MiSans;
     font-size: 24px;
     font-style: normal;

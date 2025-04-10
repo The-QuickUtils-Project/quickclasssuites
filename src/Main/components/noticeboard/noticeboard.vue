@@ -25,7 +25,7 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
             noticeElement.onclick = () => {
                 window.ipcRenderer.invoke('open-notice-window');
             };
-            noticeElement.innerHTML = `<p class="noticeTitle">${notices.value[notice].title}</p><p class="noticeTime">${notices.value[notice].date}</p><p id="noticeContent">${notices.value[notice].content}</p>`;
+            noticeElement.innerHTML = `<p class="noticeTitle">${notices.value[notice].title}</p><p class="noticeTime">${notices.value[notice].date}</p><p class="noticeContent">${notices.value[notice].content}</p>`;
             // @ts-ignore
             document.getElementById('latest_notices').appendChild(noticeElement);
         });
@@ -35,12 +35,13 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
 </script>
 
 <style lang="less">
+@import url(../widgets_global.less);
 p {
     margin: 0;
 }
 .title {
     width: 316px;
-    color: #000;
+    color: var(--Text);
     font-family: MiSans;
     font-size: 24px;
     font-style: normal;
@@ -59,7 +60,7 @@ p {
     align-items: center;
     gap: 8px;
     border-radius: 16px;
-    background: #FFF;
+    background: var(--background);
 }
 
 #latest_notices {
@@ -83,13 +84,13 @@ p {
     gap: 10px;
     align-self: stretch;
     border-radius: 16px;
-    border: 2px solid #000;
-    background: #FFF;
+    border: 2px solid #FFF;
+    background: var(--background);
     cursor: pointer;
 }
 
 .noticeTitle {
-    color: #000;
+    color: var(--Text);
     text-align: center;
     font-family: MiSans;
     font-size: 20px;
@@ -100,7 +101,7 @@ p {
 }
 
 .noticeTime {
-    color: rgba(0, 0, 0, 0.50);
+    color: var(--Text);
     text-align: center;
     font-family: MiSans;
     font-size: 15px;
@@ -111,7 +112,7 @@ p {
 }
 
 #empty {
-    color: #000;
+    color: var(--Text);
     text-align: center;
     font-family: MiSans;
     font-size: 24px;
@@ -122,7 +123,7 @@ p {
 
 .noticeContent {
     align-self: stretch;
-    color: #000;
+    color: var(--Text);
     font-family: MiSans;
     font-size: 15px;
     font-style: normal;

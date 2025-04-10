@@ -84,7 +84,7 @@ const handleConfirmed = () => {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .modal {
     z-index: 9999;
     position: fixed;

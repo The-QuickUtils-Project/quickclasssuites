@@ -19,6 +19,7 @@ const props = defineProps({
 </script>
 
 <style lang="less">
+@import url(../../widgets_global.less);
 #ToolChip {
     box-sizing: border-box;
     display: flex;
@@ -45,7 +46,7 @@ const props = defineProps({
 .tool-name {
     box-sizing: border-box;
     width: 100%;
-    color: #000;
+    color: var(--Text);
     text-align: center;
     font-family: MiSans;
     font-size: 15px;

@@ -507,7 +507,8 @@ function createWindow() {
     webPreferences: {
       preload: path$1.join(__dirname, "preload.mjs"),
       nodeIntegration: false
-    }
+    },
+    transparent: true
   });
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
@@ -738,8 +739,20 @@ function createTray() {
 }
 app.whenReady().then(() => {
   try {
+    const gotTheLock = app.requestSingleInstanceLock();
+    if (!gotTheLock) {
+      app.quit();
+      return;
+    }
     createTray();
     createWindow();
+    app.on("second-instance", (event, commandLine, workingDirectory) => {
+      if (win) {
+        if (win.isMinimized()) win.restore();
+        win.isVisible() ? win.hide() : win.show();
+        win.focus();
+      }
+    });
   } catch (error) {
     console.error("Error during app initialization:", error);
   }

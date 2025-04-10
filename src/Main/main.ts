@@ -1,6 +1,7 @@
 // @ts-ignore
 import { createApp } from 'vue'
 import App from './App.vue'
+import './Theme.css';
 
 createApp(App).mount('#app').$nextTick(() => {
   // Use contextBridge

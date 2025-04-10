@@ -6,6 +6,7 @@
 
 <script setup lang="ts"></script>
 <style lang="less">
+@import url(../widgets_global.less);
 #Dock {
     display: flex;
     width: 1099px;
@@ -16,6 +17,6 @@
     gap: 8px;
     border-radius: 30px;
     box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--background);
 }
 </style>

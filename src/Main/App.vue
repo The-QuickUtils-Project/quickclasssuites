@@ -28,23 +28,48 @@ function hideWindow() {
   // @ts-ignore
   window.electronApp.hideMainWindow();
 }
+// const app = document.getElementById('app')
+// if(app){
+//   useAcrylic(app)
+// }
+
 </script>
 
 <template>
   <div id="app">
     <div id="titlebar">
-      <img alt="quickclass-icon" id="icon" src="./assets/svgicon.svg" />
-      <img id="close_btn" src="./assets/Images/shared/close.png" alt="close" @click="hideWindow" />
+      <div id="Title">
+        <p id="maintitle">QuickClass <span id="subtitle">Hub</span></p>
+      </div>
+      <p id="closebtn" @click="hideWindow">
+        
+      </p>
     </div>
-    <component :is="components[currentPage]" @changePage="changePage"></component>
+    <transition name="fade" mode="out-in">
+      <component :is="components[currentPage]" @changePage="changePage"></component>
+    </transition>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
+
+:root {
+  --theme: #0062FF;
+  --background: rgba(0, 0, 0, 0.30);
+  --bgBlur: 10px;
+}
+
 body,
 html {
   border-radius: 16px;
-  background: #F7F7F7;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 
 #app {
@@ -57,14 +82,46 @@ html {
   flex-direction: column;
   align-items: flex-start;
   border-radius: 16px;
-  background: #F7F7F7;
   overflow: hidden;
+  background: rgba(0,0,0,0.40);
+  backdrop-filter: 
+      blur(30px)
+      brightness(120%)
+      saturate(80%);
 }
 
 #titlebar {
-  width: 100%;
-  max-height: 110px;
+  display: flex;
+padding: 22.4px 31.2px;
+justify-content: space-between;
+align-items: center;
+align-self: stretch;
   -webkit-app-region: drag;
+}
+
+#Title {
+  display: flex;
+padding-bottom: 0.4px;
+justify-content: center;
+align-items: center;
+}
+
+#maintitle {
+  color: #FFF;
+font-family: MiSans;
+font-size: 32px;
+font-style: normal;
+font-weight: 520;
+line-height: normal;
+}
+
+#subtitle {
+  color: var(--theme, #0062FF);
+font-family: MiSans;
+font-size: 32px;
+font-style: normal;
+font-weight: 520;
+line-height: normal;
 }
 
 #icon {
@@ -77,12 +134,12 @@ html {
   user-select: none;
 }
 
-#close_btn {
+#closebtn {
   width: 33.6px;
   height: 33.6px;
-  position: absolute;
-  right: 39px;
-  top: 37.7px;
+  color: white;
+  font-family: 'Segoe MDL2 Assets';
+  font-size: 20px;
   -webkit-app-region: no-drag;
   cursor: pointer;
 }

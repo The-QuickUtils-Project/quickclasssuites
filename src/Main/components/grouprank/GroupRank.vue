@@ -23,6 +23,8 @@ window.ipcRenderer.invoke('getRank').then((rank: RankObj) => {
 })
 </script>
 <style lang="less">
+@import url(../widgets_global.less);
+
 #GroupRank {
     display: flex;
     height: 284.8px;
@@ -34,7 +36,7 @@ window.ipcRenderer.invoke('getRank').then((rank: RankObj) => {
     gap: 8px;
     align-self: stretch;
     border-radius: 16px;
-    background: #FFF;
+    background: var(--background);
 }
 
 p {
@@ -43,6 +45,16 @@ p {
 
 ::-webkit-scrollbar {
     width: 0px;
+}
+
+#title {
+    width: 501.6px;
+    color: var(--Text);
+    font-family: MiSans;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 520;
+    line-height: normal;
 }
 
 #ranklist {
@@ -68,7 +80,7 @@ p {
 }
 
 .groupName {
-    color: #000;
+    color: var(--Text);
     text-align: center;
     font-family: MiSans;
     font-size: 20px;
@@ -78,7 +90,7 @@ p {
 }
 
 .pointNum {
-    color: #000;
+    color: var(--Text);
     text-align: center;
     font-family: MiSans;
     font-size: 20px;
@@ -88,11 +100,11 @@ p {
 }
 
 .pointUnit {
-    color: #000;
-font-family: MiSans;
-font-size: 15px;
-font-style: normal;
-font-weight: 250;
-line-height: normal;
+    color: var(--Text);
+    font-family: MiSans;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 250;
+    line-height: normal;
 }
 </style>
