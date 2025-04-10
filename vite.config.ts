@@ -32,6 +32,7 @@ export default defineConfig({
         main: 'index.html',
         settings: './settings.html',
         noticeman: './noticeman.html',
+        floatmenu: './floatmenu.html'
       }
     }
   }
