@@ -3,7 +3,7 @@ import { app, Tray, BrowserWindow, Menu, ipcMain, dialog } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path';
 import { QuickClass } from '../QuickClass/QuickClass';
-
+import { floatMenu } from './floatmenu';
 
 let quickClass = new QuickClass();
 
@@ -34,13 +34,13 @@ function createWindow() {
     width: 1440,
     height: 1024,
     frame: false,
-    resizable: false,
+    // resizable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false
     },
     transparent: true,
-    // alwaysOnTop: true
+    alwaysOnTop: true
   })
 
   // Test active push message to Renderer-process.
@@ -375,7 +375,10 @@ function createTray() {
 //     },
 //   },
 // ]);
+
+// Init FloatMenu
 // Init app
+let floatMenu_: floatMenu | null;
 app.whenReady().then(() => {
   try {
     const gotTheLock = app.requestSingleInstanceLock();
@@ -385,6 +388,8 @@ app.whenReady().then(() => {
     }
     createTray();
     createWindow();
+    floatMenu_ = new floatMenu(win, VITE_DEV_SERVER_URL, RENDERER_DIST)
+    console.log("Init floatMenu")
     console.log(quickClass.configSession.getConfigItem('archievePath'))
     // protocol.handle('qcres', (request) => {
     //   // 1. 获取请求路径（移除协议和域名）
@@ -424,6 +429,7 @@ app.whenReady().then(() => {
         win.focus();
       }
     });
+    floatMenu_.hide()
   } catch (error) {
     console.error('Error during app initialization:', error);
   }
@@ -447,6 +453,7 @@ process.on('uncaughtException', (error) => {
 ipcMain.on('hide-main-window', () => {
   if (win) {
     win.hide();
+    floatMenu_?.show()
   }
 })
 

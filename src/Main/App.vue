@@ -52,7 +52,6 @@ function hideWindow() {
 </template>
 
 <style scoped lang="less">
-
 :root {
   --theme: #0062FF;
   --background: rgba(0, 0, 0, 0.30);
@@ -64,11 +63,13 @@ html {
   border-radius: 16px;
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.2s;
 }
 
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -83,45 +84,43 @@ html {
   align-items: flex-start;
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(0,0,0,0.40);
-  backdrop-filter: 
-      blur(30px)
-      brightness(120%)
-      saturate(80%);
+  background: rgba(0, 0, 0, 0.40);
+  backdrop-filter:
+    blur(30px) brightness(120%) saturate(80%);
 }
 
 #titlebar {
   display: flex;
-padding: 22.4px 31.2px;
-justify-content: space-between;
-align-items: center;
-align-self: stretch;
+  padding: 22.4px 31.2px;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
   -webkit-app-region: drag;
 }
 
 #Title {
   display: flex;
-padding-bottom: 0.4px;
-justify-content: center;
-align-items: center;
+  padding-bottom: 0.4px;
+  justify-content: center;
+  align-items: center;
 }
 
 #maintitle {
   color: #FFF;
-font-family: MiSans;
-font-size: 32px;
-font-style: normal;
-font-weight: 520;
-line-height: normal;
+  font-family: MiSans;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 520;
+  line-height: normal;
 }
 
 #subtitle {
   color: var(--theme, #0062FF);
-font-family: MiSans;
-font-size: 32px;
-font-style: normal;
-font-weight: 520;
-line-height: normal;
+  font-family: MiSans;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 520;
+  line-height: normal;
 }
 
 #icon {

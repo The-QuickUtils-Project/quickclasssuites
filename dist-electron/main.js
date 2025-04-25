@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { app, ipcMain, dialog, BrowserWindow, Tray, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, Tray, Menu } from "electron";
 import { fileURLToPath } from "node:url";
 import path$1 from "node:path";
 import * as fs from "fs";
@@ -484,6 +484,39 @@ class QuickClass {
     console.log("Reloaded");
   }
 }
+const __dirname$1 = path$1.dirname(fileURLToPath(import.meta.url));
+class floatMenu {
+  constructor(mainWindow, VITE_DEV_SERVER_URL2, RENDERER_DIST2) {
+    __publicField(this, "floatMenu");
+    __publicField(this, "hide", () => {
+      var _a;
+      return (_a = this.floatMenu) == null ? void 0 : _a.hide();
+    });
+    __publicField(this, "show", () => {
+      var _a;
+      return (_a = this.floatMenu) == null ? void 0 : _a.show();
+    });
+    this.floatMenu = new BrowserWindow({
+      width: 60,
+      height: 250,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      frame: false,
+      transparent: true,
+      webPreferences: {
+        preload: path$1.join(__dirname$1, "preload.mjs")
+      }
+    });
+    if (VITE_DEV_SERVER_URL2) {
+      this.floatMenu.loadURL(VITE_DEV_SERVER_URL2 + "/floatmenu");
+    } else {
+      this.floatMenu.loadFile(path$1.join(RENDERER_DIST2, "floatmenu.html"));
+    }
+    ipcMain.handle("floatMenu.showMainWindow", () => {
+      mainWindow == null ? void 0 : mainWindow.show();
+    });
+  }
+}
 let quickClass = new QuickClass();
 let extTool = quickClass.extTools;
 let noticeBoard = quickClass.Noticeboard;
@@ -502,13 +535,13 @@ function createWindow() {
     width: 1440,
     height: 1024,
     frame: false,
-    resizable: false,
+    // resizable: false,
     webPreferences: {
       preload: path$1.join(__dirname, "preload.mjs"),
       nodeIntegration: false
     },
-    transparent: true
-    // alwaysOnTop: true
+    transparent: true,
+    alwaysOnTop: true
   });
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
@@ -737,6 +770,7 @@ function createTray() {
     }
   });
 }
+let floatMenu_;
 app.whenReady().then(() => {
   try {
     const gotTheLock = app.requestSingleInstanceLock();
@@ -746,6 +780,8 @@ app.whenReady().then(() => {
     }
     createTray();
     createWindow();
+    floatMenu_ = new floatMenu(win, VITE_DEV_SERVER_URL, RENDERER_DIST);
+    console.log("Init floatMenu");
     console.log(quickClass.configSession.getConfigItem("archievePath"));
     app.on("second-instance", (event, commandLine, workingDirectory) => {
       if (win) {
@@ -754,6 +790,7 @@ app.whenReady().then(() => {
         win.focus();
       }
     });
+    floatMenu_.hide();
   } catch (error) {
     console.error("Error during app initialization:", error);
   }
@@ -767,6 +804,7 @@ process.on("uncaughtException", (error) => {
 ipcMain.on("hide-main-window", () => {
   if (win) {
     win.hide();
+    floatMenu_ == null ? void 0 : floatMenu_.show();
   }
 });
 ipcMain.on("close-settings-window", () => {
