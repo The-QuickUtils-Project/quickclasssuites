@@ -42,6 +42,7 @@ function createWindow() {
     transparent: true,
     alwaysOnTop: true
   })
+  win.setAlwaysOnTop(true, 'screen-saver')
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
@@ -348,6 +349,7 @@ function createTray() {
   tray.on('click', () => {
     if (win) {
       win.isVisible() ? win.hide() : win.show();
+      floatMenu_?.isVisible() ? floatMenu_.hide() : floatMenu_?.show();
     }
   });
 }
@@ -376,6 +378,10 @@ function createTray() {
 //   },
 // ]);
 
+ipcMain.handle('main.MainWindow.show', ()=>{
+  win?.isVisible()? win?.hide() : win?.show();
+  floatMenu_?.hide()
+})
 // Init FloatMenu
 // Init app
 let floatMenu_: floatMenu | null;
