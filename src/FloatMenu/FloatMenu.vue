@@ -1,14 +1,13 @@
 <template>
+    <div id="dragArea"></div>
     <div id="FloatMenu">
-        <img src="./floatMenu.svg" alt="" @click="()=>{}"/>
+        <img src="./floatMenu.svg" alt="" @click="()=>{showMainWin()}"/>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ipcRenderer } from 'electron';
-
-function onMenuClicker() {
-    ipcRenderer.invoke
+function showMainWin(){
+    window.ipcRenderer.invoke('main.MainWindow.show')
 }
 </script>
 
@@ -20,6 +19,15 @@ html {
     box-sizing: border-box;
     overflow: hidden;
 }
+#dragArea {
+    z-index: 999;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    -webkit-app-region: drag;
+    width: 60px;
+    height: 20px;
+}
 
 #FloatMenu {
     display: inline-flex;
@@ -29,9 +37,9 @@ html {
     align-items: center;
     border-radius: 10px;
     background: #F7F7F7;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-app-region: drag;
+    //-webkit-user-select: none;
+    //user-select: none;
+    //-webkit-app-region: drag;
 }
 
 #textContainer {
