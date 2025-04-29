@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from 'node:url'
 
@@ -14,10 +14,12 @@ export class floatMenu{
             skipTaskbar: true,
             frame: false,
             transparent: true,
+            resizable: true,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.mjs'),
             }
         })
+        this.floatMenu.setAlwaysOnTop(true, 'screen-saver');
         if (VITE_DEV_SERVER_URL) {
             this.floatMenu.loadURL(VITE_DEV_SERVER_URL + '/floatmenu')
           } else {
@@ -29,4 +31,5 @@ export class floatMenu{
     };
     hide = ()=> this.floatMenu?.hide();
     show = ()=> this.floatMenu?.show();
+    isVisible = ()=> {return this.floatMenu?.isVisible};
 }
