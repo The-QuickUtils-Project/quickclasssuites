@@ -23,7 +23,7 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
             const noticeElement = document.createElement('div');
             noticeElement.className = 'notice-item';
             noticeElement.onclick = () => {
-                window.ipcRenderer.invoke('open-notice-window');
+                window.ipcRenderer.invoke('noticeboard.Window.open');
             };
             noticeElement.innerHTML = `<p class="noticeTitle">${notices.value[notice].title}</p><p class="noticeTime">${notices.value[notice].date}</p><p class="noticeContent">${notices.value[notice].content}</p>`;
             // @ts-ignore

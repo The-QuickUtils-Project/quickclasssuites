@@ -4,9 +4,9 @@
 
 ### Dock栏
 
-#### launch-tool(toolId: string)
+#### quickclass.engine.hub.dock.extTool.launch(toolId: string)
 
-#### getToolList()
+#### quickclass.engine.hub.dock.extTool.getList()
 
 #### getIconBase64(toolId: string)
 
@@ -14,14 +14,14 @@
 
 #### getNoticeList()
 
-#### open-notice-window()
+#### noticeboard.Window.open()
 
 ### OnClass组件
 
-#### getGroupsInfo()
+#### quickclass.engine.onclass.getData.groups()
 
 获取完整的小组信息(包括point, members)
 
-#### getStudentsInfo()
+#### quickclass.engine.onclass.getData.students()
 
 获取完整的学生信息(Name, Avatar, Group)

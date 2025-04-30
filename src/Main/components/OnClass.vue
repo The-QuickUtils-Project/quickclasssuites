@@ -43,7 +43,7 @@ import Random from './randomDialog/random.vue';
 const emit = defineEmits(['changePage']);
 const groups = ref<groups | null>(null);
 const students = ref<students | null>(null);
-window.ipcRenderer.invoke('getStudentsInfo').then((result: students) => {
+window.ipcRenderer.invoke('quickclass.engine.onclass.getData.students').then((result: students) => {
     students.value = result;
     console.log('students', students.value);
 });
@@ -73,7 +73,7 @@ function onConfirmpoint(data: { groupId: string; point: number }) {
         groups.value[data.groupId].point = Number(data.point);
         console.log('groupValue', groups.value)
         const groupsData = groups.value;
-        window.ipcRenderer.invoke('updateGroupStorage', JSON.stringify(groupsData));
+        window.ipcRenderer.invoke('quickclass.engine.onclass.updateData.groups', JSON.stringify(groupsData));
         console.log('Updated group point:', groups.value[data.groupId]);
     }else{
         console.error('Group not found:', data.groupId);
@@ -90,7 +90,7 @@ const closepointDialog = () => {
 // `;
 // document.getElementById('onclassView')?.appendChild(point_dialog);
 
-window.ipcRenderer.invoke('getGroupsInfo').then((result: groups) => {
+window.ipcRenderer.invoke('quickclass.engine.onclass.getData.groups').then((result: groups) => {
     groups.value = result;
     console.log('groups', groups.value);
     if (groups.value && Object.keys(groups.value).length > 0) {
@@ -148,7 +148,7 @@ interface ToolInfo {
 const tools = ref<Record<string, ToolInfo> | null>(null);
 const toolIcons = ref<Record<string, string>>({});
 
-window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>) => {
+window.ipcRenderer.invoke('quickclass.engine.hub.dock.extTool.getList').then((result: Record<string, ToolInfo>) => {
     console.log('ToolList', result);
     tools.value = result;
     loadToolIcons();
@@ -156,7 +156,7 @@ window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>)
 
 
 function startTool(id: string) {
-    window.ipcRenderer.invoke('launch-tool', id)
+    window.ipcRenderer.invoke('quickclass.engine.hub.dock.extTool.launch', id)
 }
 
 

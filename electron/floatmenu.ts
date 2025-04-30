@@ -14,7 +14,7 @@ export class floatMenu{
             skipTaskbar: true,
             frame: false,
             transparent: true,
-            resizable: true,
+            resizable: false,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.mjs'),
             }

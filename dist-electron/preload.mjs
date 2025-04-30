@@ -27,5 +27,5 @@ electron.contextBridge.exposeInMainWorld("electronApp", {
 });
 electron.contextBridge.exposeInMainWorld("resource", {
   getBase64Image: (path) => electron.ipcRenderer.invoke("read-image-to-base64", path),
-  launchTool: (id) => electron.ipcRenderer.invoke("launch-tool", id)
+  launchTool: (id) => electron.ipcRenderer.invoke("quickclass.engine.hub.dock.extTool.launch", id)
 });

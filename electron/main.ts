@@ -123,7 +123,7 @@ function createNoticeWindow() {
   }
 }
 
-ipcMain.handle('open-notice-window', async () => {
+ipcMain.handle('noticeboard.Window.open', async () => {
   if (noticemanWindow) {
     noticemanWindow.focus()
   } else {
@@ -131,7 +131,7 @@ ipcMain.handle('open-notice-window', async () => {
   }
 })
 
-ipcMain.on('close-noticeman-window', () => {
+ipcMain.handle('noticeboard.Window.close', () => {
   if (noticemanWindow) {
     noticemanWindow.close()
     noticemanWindow = null
@@ -139,7 +139,7 @@ ipcMain.on('close-noticeman-window', () => {
 })
 
 // OnClass组件Handlers
-ipcMain.handle('getGroupsInfo', async () => {
+ipcMain.handle('quickclass.engine.onclass.getData.groups', async () => {
   try {
     const groupsInfo = OnClass.getGroupList();
     console.log('获取分组信息成功:', groupsInfo)
@@ -150,7 +150,7 @@ ipcMain.handle('getGroupsInfo', async () => {
   }
 })
 
-ipcMain.handle('getStudentsInfo', async () => {
+ipcMain.handle('quickclass.engine.onclass.getData.students', async () => {
   try {
     const studentsInfo = OnClass.studentList;
     console.log('获取学生信息成功:', studentsInfo)
@@ -163,7 +163,7 @@ ipcMain.handle('getStudentsInfo', async () => {
 
 //Random 组件对接
 const randomUtil = OnClass.randomStu
-ipcMain.handle('getRandomStudent', async (_, n) => {
+ipcMain.handle('quickclass.engine.onclass.tools.random.student', async (_, n) => {
   const result = randomUtil.getRandomStudent(n)
   let resultText = '';
   result.forEach((student) => {
@@ -178,7 +178,7 @@ ipcMain.handle('getRandomStudent', async (_, n) => {
   })
 })
 
-ipcMain.handle('getRandomGroup', async (_, n) => {
+ipcMain.handle('quickclass.engine.onclass.tools.random.group', async (_, n) => {
   const result = randomUtil.getRandomGroup(n)
   let resultText = '';
   result.forEach((student) => {
@@ -193,7 +193,7 @@ ipcMain.handle('getRandomGroup', async (_, n) => {
   })
 })
 
-ipcMain.handle('getRandomGroupMember', async (_, n) => {
+ipcMain.handle('quickclass.engine.onclass.tools.random.groupMember', async (_, n) => {
   const result = randomUtil.getRandomStuInEachGp(n)
   let resultText = '';
   Object.keys(result).forEach((student) => {
@@ -209,11 +209,11 @@ ipcMain.handle('getRandomGroupMember', async (_, n) => {
 })
 
 // Rank小组件对接
-ipcMain.handle('getRank', () => {
+ipcMain.handle('quickclass.engine.hub.groupRank.get', () => {
   return quickClass.getGroupRank()
 })
 
-ipcMain.handle('updateGroupStorage', async (_, groups) => {
+ipcMain.handle('quickclass.engine.onclass.updateData.groups', async (_, groups) => {
   console.log('[main.ts]Saving updated group data.');
   groups = JSON.parse(groups);
   OnClass.saveGroupStorage(groups);
@@ -248,7 +248,7 @@ ipcMain.handle('updateGroupStorage', async (_, groups) => {
 // })
 
 // Dock栏工具
-ipcMain.handle('launch-tool', async (_, toolId) => {
+ipcMain.handle('quickclass.engine.hub.dock.extTool.launch', async (_, toolId) => {
   try {
     extTool.startTool(toolId);
   } catch (error) {
@@ -257,7 +257,7 @@ ipcMain.handle('launch-tool', async (_, toolId) => {
   }
 })
 
-ipcMain.handle('getToolList', async () => {
+ipcMain.handle('quickclass.engine.hub.dock.extTool.getList', async () => {
   try {
     console.log('gotTodoList', extTool.getToolList())
     return extTool.getToolList()

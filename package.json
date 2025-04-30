@@ -22,6 +22,7 @@
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
     "less": "^4.2.2",
+    "less-loader": "^12.2.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",

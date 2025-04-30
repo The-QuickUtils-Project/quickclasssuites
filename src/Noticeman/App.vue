@@ -20,7 +20,7 @@ import QiButton from './assets/QiButton.vue';
 // @ts-ignore
 import { ref } from 'vue';
 function hideWindow() {
-    window.ipcRenderer.send("close-noticeman-window");
+    window.ipcRenderer.invoke("noticeboard.Window.close");
 }
 
 const notices = ref<notices | null>(null);
@@ -33,7 +33,7 @@ window.ipcRenderer.invoke('getNoticeList').then((result: notices) => {
             const noticeElement = document.createElement('div');
             noticeElement.className = 'notice-item';
             noticeElement.onclick = () => {
-                window.ipcRenderer.invoke('open-notice-window');
+                window.ipcRenderer.invoke('noticeboard.Window.open');
             };
             noticeElement.innerHTML = `
             <p class="notice-title">

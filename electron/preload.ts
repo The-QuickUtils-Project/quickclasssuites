@@ -32,5 +32,5 @@ contextBridge.exposeInMainWorld('electronApp', {
 
 contextBridge.exposeInMainWorld('resource', {
   getBase64Image: (path: string) => ipcRenderer.invoke('read-image-to-base64', path),
-  launchTool: (id: string) => ipcRenderer.invoke('launch-tool', id),
+  launchTool: (id: string) => ipcRenderer.invoke('quickclass.engine.hub.dock.extTool.launch', id),
 })

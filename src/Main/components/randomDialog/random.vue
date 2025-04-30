@@ -75,11 +75,11 @@ const handleIncrease = () => {
 
 const handleConfirmed = () => {
     if(currentMode_.value === 'student'){
-        window.ipcRenderer.invoke('getRandomStudent', currentAmount.value)
+        window.ipcRenderer.invoke('quickclass.engine.onclass.tools.random.student', currentAmount.value)
     }else if(currentMode_.value === 'group'){
-        window.ipcRenderer.invoke('getRandomGroup', currentAmount.value)
+        window.ipcRenderer.invoke('quickclass.engine.onclass.tools.random.group', currentAmount.value)
     }else if(currentMode_.value === 'groupMember'){
-        window.ipcRenderer.invoke('getRandomGroupMember', currentAmount.value)
+        window.ipcRenderer.invoke('quickclass.engine.onclass.tools.random.groupMember', currentAmount.value)
     }
 }
 </script>

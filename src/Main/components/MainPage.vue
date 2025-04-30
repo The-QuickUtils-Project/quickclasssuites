@@ -47,7 +47,7 @@ interface ToolInfo {
 const tools = ref<Record<string, ToolInfo> | null>(null);
 const toolIcons = ref<Record<string, string>>({});
 
-window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>) => {
+window.ipcRenderer.invoke('quickclass.engine.hub.dock.extTool.getList').then((result: Record<string, ToolInfo>) => {
     console.log('ToolList', result);
     tools.value = result;
     loadToolIcons();
@@ -55,7 +55,7 @@ window.ipcRenderer.invoke('getToolList').then((result: Record<string, ToolInfo>)
 
 
 function startTool(id: string) {
-    window.ipcRenderer.invoke('launch-tool', id)
+    window.ipcRenderer.invoke('quickclass.engine.hub.dock.extTool.launch', id)
 }
 
 

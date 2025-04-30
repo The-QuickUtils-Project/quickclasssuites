@@ -9,7 +9,7 @@ interface RankObj {
     [name: string]: number
 }
 
-window.ipcRenderer.invoke('getRank').then((rank: RankObj) => {
+window.ipcRenderer.invoke('quickclass.engine.hub.groupRank.get').then((rank: RankObj) => {
     console.log("rankContent", rank)
     Object.keys(rank).forEach((name) => {
         const rankChip = document.createElement('div');

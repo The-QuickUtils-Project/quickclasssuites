@@ -496,6 +496,10 @@ class floatMenu {
       var _a;
       return (_a = this.floatMenu) == null ? void 0 : _a.show();
     });
+    __publicField(this, "isVisible", () => {
+      var _a;
+      return (_a = this.floatMenu) == null ? void 0 : _a.isVisible;
+    });
     this.floatMenu = new BrowserWindow({
       width: 60,
       height: 250,
@@ -503,10 +507,12 @@ class floatMenu {
       skipTaskbar: true,
       frame: false,
       transparent: true,
+      resizable: false,
       webPreferences: {
         preload: path$1.join(__dirname$1, "preload.mjs")
       }
     });
+    this.floatMenu.setAlwaysOnTop(true, "screen-saver");
     if (VITE_DEV_SERVER_URL2) {
       this.floatMenu.loadURL(VITE_DEV_SERVER_URL2 + "/floatmenu");
     } else {
@@ -543,6 +549,7 @@ function createWindow() {
     transparent: true,
     alwaysOnTop: true
   });
+  win.setAlwaysOnTop(true, "screen-saver");
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });
@@ -600,20 +607,20 @@ function createNoticeWindow() {
     noticemanWindow.loadFile(path$1.join(RENDERER_DIST, "noticeman.html"));
   }
 }
-ipcMain.handle("open-notice-window", async () => {
+ipcMain.handle("noticeboard.Window.open", async () => {
   if (noticemanWindow) {
     noticemanWindow.focus();
   } else {
     createNoticeWindow();
   }
 });
-ipcMain.on("close-noticeman-window", () => {
+ipcMain.handle("noticeboard.Window.close", () => {
   if (noticemanWindow) {
     noticemanWindow.close();
     noticemanWindow = null;
   }
 });
-ipcMain.handle("getGroupsInfo", async () => {
+ipcMain.handle("quickclass.engine.onclass.getData.groups", async () => {
   try {
     const groupsInfo = OnClass2.getGroupList();
     console.log("获取分组信息成功:", groupsInfo);
@@ -623,7 +630,7 @@ ipcMain.handle("getGroupsInfo", async () => {
     return null;
   }
 });
-ipcMain.handle("getStudentsInfo", async () => {
+ipcMain.handle("quickclass.engine.onclass.getData.students", async () => {
   try {
     const studentsInfo = OnClass2.studentList;
     console.log("获取学生信息成功:", studentsInfo);
@@ -634,7 +641,7 @@ ipcMain.handle("getStudentsInfo", async () => {
   }
 });
 const randomUtil = OnClass2.randomStu;
-ipcMain.handle("getRandomStudent", async (_, n) => {
+ipcMain.handle("quickclass.engine.onclass.tools.random.student", async (_, n) => {
   const result = randomUtil.getRandomStudent(n);
   let resultText = "";
   result.forEach((student) => {
@@ -647,7 +654,7 @@ ipcMain.handle("getRandomStudent", async (_, n) => {
     detail: resultText
   });
 });
-ipcMain.handle("getRandomGroup", async (_, n) => {
+ipcMain.handle("quickclass.engine.onclass.tools.random.group", async (_, n) => {
   const result = randomUtil.getRandomGroup(n);
   let resultText = "";
   result.forEach((student) => {
@@ -660,7 +667,7 @@ ipcMain.handle("getRandomGroup", async (_, n) => {
     detail: resultText
   });
 });
-ipcMain.handle("getRandomGroupMember", async (_, n) => {
+ipcMain.handle("quickclass.engine.onclass.tools.random.groupMember", async (_, n) => {
   const result = randomUtil.getRandomStuInEachGp(n);
   let resultText = "";
   Object.keys(result).forEach((student) => {
@@ -673,15 +680,15 @@ ipcMain.handle("getRandomGroupMember", async (_, n) => {
     detail: resultText
   });
 });
-ipcMain.handle("getRank", () => {
+ipcMain.handle("quickclass.engine.hub.groupRank.get", () => {
   return quickClass.getGroupRank();
 });
-ipcMain.handle("updateGroupStorage", async (_, groups) => {
+ipcMain.handle("quickclass.engine.onclass.updateData.groups", async (_, groups) => {
   console.log("[main.ts]Saving updated group data.");
   groups = JSON.parse(groups);
   OnClass2.saveGroupStorage(groups);
 });
-ipcMain.handle("launch-tool", async (_, toolId) => {
+ipcMain.handle("quickclass.engine.hub.dock.extTool.launch", async (_, toolId) => {
   try {
     extTool.startTool(toolId);
   } catch (error) {
@@ -689,7 +696,7 @@ ipcMain.handle("launch-tool", async (_, toolId) => {
     dialog.showErrorBox("启动外部工具失败", "请检查工具配置或路径是否正确。");
   }
 });
-ipcMain.handle("getToolList", async () => {
+ipcMain.handle("quickclass.engine.hub.dock.extTool.getList", async () => {
   try {
     console.log("gotTodoList", extTool.getToolList());
     return extTool.getToolList();
@@ -767,9 +774,14 @@ function createTray() {
   tray.on("click", () => {
     if (win) {
       win.isVisible() ? win.hide() : win.show();
+      (floatMenu_ == null ? void 0 : floatMenu_.isVisible()) ? floatMenu_.hide() : floatMenu_ == null ? void 0 : floatMenu_.show();
     }
   });
 }
+ipcMain.handle("main.MainWindow.show", () => {
+  (win == null ? void 0 : win.isVisible()) ? win == null ? void 0 : win.hide() : win == null ? void 0 : win.show();
+  floatMenu_ == null ? void 0 : floatMenu_.hide();
+});
 let floatMenu_;
 app.whenReady().then(() => {
   try {
