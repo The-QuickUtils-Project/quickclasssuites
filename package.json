@@ -1,7 +1,7 @@
 {
   "name": "classhub",
   "private": true,
-  "version": "2.0.4",
+  "version": "2.0.5",
   "author": "The QuickUtils Authors",
   "type": "module",
   "description": "基于Electron与Vue3的课堂管理&教学工具",
