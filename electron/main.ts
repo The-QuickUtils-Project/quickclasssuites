@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path';
 import { QuickClass } from '../QuickClass/QuickClass';
 import { floatMenu } from './floatmenu';
+import windowStateKeeper from 'electron-window-state';
 
 let quickClass = new QuickClass();
 
@@ -29,10 +30,17 @@ let win: BrowserWindow | null
 
 //主窗口创建
 function createWindow() {
+  let winStateKeeper = windowStateKeeper({
+    defaultHeight: 1024,
+    defaultWidth: 1440
+  });
+
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, 'favicon-64.ico'),
-    width: 1440,
-    height: 1024,
+    width: winStateKeeper.width,
+    height: winStateKeeper.height,
+    x: winStateKeeper.x,
+    y: winStateKeeper.y,
     frame: false,
     // resizable: false,
     webPreferences: {
@@ -43,7 +51,7 @@ function createWindow() {
     alwaysOnTop: true
   })
   win.setAlwaysOnTop(true, 'screen-saver')
-
+  winStateKeeper.manage(win)
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
@@ -304,7 +312,10 @@ app.on('activate', () => {
   }
 })
 
-
+app.on('before-quit', ()=>{
+  floatMenu_?.saveState()
+  
+})
 
 
 // Create Tray icon and context menu

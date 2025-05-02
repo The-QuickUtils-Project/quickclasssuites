@@ -71,34 +71,6 @@ async function loadToolIcons() {
 
 </script>
 
-<style scoped>
-#widgets {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.main-page {
-    display: flex;
-    height: 692px;
-    padding: 10px 0px;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-    align-self: stretch;
-}
-
-#rightArea {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-#divider {
-    width: 6px;
-    height: 100px;
-    flex-shrink: 0;
-}
+<style lang="less" scoped>
+@import url(../assets/styles/Dark/MainPage/MainPage.vue.less);
 </style>

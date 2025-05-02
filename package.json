@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@microsoft/clarity": "^1.0.0",
+    "electron-window-state": "^5.0.3",
     "uuid": "^11.1.0",
     "vue": "^3.4.21",
     "vxe-table": "^4.12.2"

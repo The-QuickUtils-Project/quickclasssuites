@@ -5,27 +5,5 @@
 </template>
 
 <style lang="less" scoped>
-@import url(../widgets_global.less);
-#ClassSchedule {
-    display: flex;
-    height: 245px;
-    width: 575px;
-    padding: 20px 0px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    align-self: stretch;
-    border-radius: 16px;
-    background: var(--background);
-}
-#title {
-    width: 501.6px;
-    color: var(--Text);
-    font-family: MiSans;
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 520;
-    line-height: normal;
-}
+@import url(../../assets/styles/Dark/MainPage/Widgets/ClassSchedule.vue.less);
 </style>
